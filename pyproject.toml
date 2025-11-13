@@ -55,11 +55,6 @@ poethepoet = "^0.37.0"
 pytest = "^8.4.2"
 pytest-cov = "^7.0.0"
 
-[tool.poetry.group.docs.dependencies]
-sphinx = "^8.2.3"
-sphinx-rtd-theme = "^3.0.2"
-myst-parser = "^4.0.1"
-
 [tool.poetry.scripts]
 MinecraftDockerCLI = "src.__main__:main"
 
