@@ -42,12 +42,12 @@ class Menus:
     def service(self, name: str) -> dict[str, Any]:
         self.__get_ports()
         expose = self.__expose()
-        not_exposed = {
-            name: port
+        ports = [
+            f"${{{name}}}:{port}"
             for name, port in self.ports.items()
             if name not in expose
-        }
-        ports = [f"${{{name}}}:{port}" for name, port in not_exposed.items()]
+        ]
+        expose = [f"${{{name}}}" for name in expose]
 
         self.__resources()
         resources = deepcopy(self.resources)
@@ -110,7 +110,7 @@ class Menus:
             if confirm(
                 msg=f"Want to expose {name} assigned to {port}? ", default=False
             ):
-                expose.append(f"${{{name}}}")
+                expose.append(name)
 
         return expose
 
