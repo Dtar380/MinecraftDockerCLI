@@ -53,6 +53,7 @@ poethepoet = "^0.37.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.4.2"
+pytest-cov = "^7.0.0"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^8.2.3"
