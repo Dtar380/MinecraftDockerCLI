@@ -3,7 +3,7 @@
 #################################################
 from __future__ import annotations
 
-from click import group, Group, Context
+from click import Context, Group, group
 from click.formatting import HelpFormatter
 
 from .cli.builder import Builder

@@ -18,7 +18,6 @@ from .files import FileManager
 # CODE
 #################################################
 class ComposeManager:
-
     """
     Compose manager class. In charge of executing docker commands.
     """
@@ -28,7 +27,10 @@ class ComposeManager:
         self.file_manager = FileManager()
 
     def __run(
-        self, *args: str, capture_output: bool = False, print_output: bool = True
+        self,
+        *args: str,
+        capture_output: bool = False,
+        print_output: bool = True,
     ) -> CompletedProcess[str]:
         command = ["docker", "compose", "-f", str(self.composer_file), *args]
         result = run(command, text=True, capture_output=capture_output)
@@ -39,7 +41,9 @@ class ComposeManager:
         return result
 
     def get_services(self) -> list[str]:
-        result = self.__run("config", "--services", capture_output=True, print_output=False)
+        result = self.__run(
+            "config", "--services", capture_output=True, print_output=False
+        )
         if result.returncode != 0:
             return []
         services = [

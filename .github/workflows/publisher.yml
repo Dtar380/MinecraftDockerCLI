@@ -19,19 +19,17 @@ jobs:
       id-token: write
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python - -y
-
-      - name: Update PATH for Poetry
-        run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
+          echo "${HOME}/.local/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
         run: poetry install --sync --no-interaction
