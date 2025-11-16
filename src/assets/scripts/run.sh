@@ -15,7 +15,7 @@ echo "─╤═════════╡ *** MINECRAFT SERVER *** ╞═══
 echo " │"
 echo " ├─ SERVER NAME: ${CONTAINER_NAME}"
 echo " ├─ TOTAL RAM: ${TOTAL_MEM_MB}MB"
-echo " ├─ ALLOCATED RAM: -Xmx${MAX_RAM}M -Xms${MIN_RAM}M"
+echo " ├─ ALLOCATED RAM: -Xmx${MAX_RAM} -Xms${MIN_RAM}"
 echo " └─ JAVA ARGS: ${JAVA_ARGS}"
 echo ""
 
@@ -29,4 +29,4 @@ if [ ! -f "${SERVER_JAR}" ]; then
 fi
 
 # Run minecraft with the designated flags
-exec java -Xmx${MAX_RAM}M -Xms${MIN_RAM}M ${JAVA_ARGS} -jar ${SERVER_JAR} nogui
+exec java -Xmx${MAX_RAM} -Xms${MIN_RAM} ${JAVA_ARGS} -jar ${SERVER_JAR} nogui

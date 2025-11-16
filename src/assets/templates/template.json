@@ -7,7 +7,7 @@
           "context": "./servers/server/"
         },
         "env_file": "./servers/server/.env",
-        "volume": "./servers/server:/server",
+        "volume": "server_data:/server",
         "ports": [
           "${HOST_PORT}:${HOST_PORT}"
         ],
@@ -28,6 +28,9 @@
           }
         }
       }
+    ],
+    "volumes": [
+      "server_data"
     ],
     "networks": [
       "mc-network"

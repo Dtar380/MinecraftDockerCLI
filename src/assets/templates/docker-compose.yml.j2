@@ -6,16 +6,10 @@ services:
       dockerfile: Dockerfile
     env_file:
       - {{ svc.env_file }}
-    container_name: ${CONTAINER_NAME}
-    environment:
-      - CONTAINER_NAME=${CONTAINER_NAME}
-      - SERVER_DIR=./${CONTAINER_NAME}
-      - SERVER_JAR=${SERVER_JAR}
-      - JAVA_ARGS=${JAVA_ARGS}
-      - MIN_HEAP_SIZE=${MIN_HEAP_SIZE}
-      - MAX_HEAP_SIZE=${MAX_HEAP_SIZE}
+    container_name: {{ svc.name }}
     volumes:
       - {{ svc.volume }}
+    working_dir: {{ svc.working_dir }}
 {% if svc.ports is defined %}
     ports:
 {% for p in svc.ports %}
@@ -50,12 +44,12 @@ services:
 {% endfor %}
 {% endif %}
 {% endif %}
-
-    restart: unless-stopped
 {% endfor %}
 
+{% if networks %}
 networks:
 {% for net_name in networks %}
   {{ net_name }}:
     driver: bridge
 {% endfor %}
+{% endif %}

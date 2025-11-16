@@ -43,11 +43,11 @@ class Menus:
         self.__get_ports()
         expose = self.__expose()
         ports = [
-            f"${{{name}}}:{port}"
+            f"{port}:{port}"
             for name, port in self.ports.items()
             if name not in expose
         ]
-        expose = [f"${{{name}}}" for name in expose]
+        exposed = [self.ports[name] for name in expose]
 
         self.__resources()
         resources = deepcopy(self.resources)
@@ -63,12 +63,13 @@ class Menus:
             "build": {"context": f"./servers/{name}/"},
             "env_file": f"./servers/{name}/.env",
             "volume": f"./servers/{name}:/{name}",
+            "working_dir": f"/{name}"
         }
 
         if ports:
             service["ports"] = ports
         if expose:
-            service["expose"] = expose  # type: ignore
+            service["expose"] = exposed
         if self.network:
             service["networks"] = [self.network]
         if resources:
@@ -178,6 +179,8 @@ class Menus:
 
         return {
             "CONTAINER_NAME": name,
+            "HOST_DIR": f"./servers/{name}",
+            "SERVER_DIR": f"/{name}",
             "SEVER_JAR": self.__get_jar(name),
             "JAVA_ARGS": self.__use_args(),
             "MIN_HEAP_SIZE": heaps[0],
