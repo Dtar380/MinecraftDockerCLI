@@ -1,7 +1,8 @@
 FROM eclipse-temurin:21-jdk-jammy
 
-ENV SERVER_DIR=/server
-ENV SERVER_JAR=server.jar
+ENV CONTAINER_NAME=""
+ENV SERVER_DIR=""
+ENV SERVER_JAR=""
 ENV JAVA_ARGS=""
 ENV MIN_HEAP_SIZE=""
 ENV MAX_HEAP_SIZE=""

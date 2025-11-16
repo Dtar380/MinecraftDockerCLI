@@ -42,11 +42,15 @@ class Menus:
     def service(self, name: str) -> dict[str, Any]:
         self.__get_ports()
         expose = self.__expose()
-        not_exposed = [port for port in self.ports if port not in expose]
-        ports = [f"${{{port}}}:${{{port}}}" for port in not_exposed]
+        not_exposed = {
+            name: port
+            for name, port in self.ports.items()
+            if name not in expose
+        }
+        ports = [f"${{{name}}}:{port}" for name, port in not_exposed.items()]
+
         self.__resources()
         resources = deepcopy(self.resources)
-
         resources["limits"]["memory"] = (
             str(resources["limits"]["memory"] / 1024) + "g"
         )
@@ -174,20 +178,21 @@ class Menus:
 
         return {
             "CONTAINER_NAME": name,
-            "SEVER_JAR": self.__get_jar(),
+            "SEVER_JAR": self.__get_jar(name),
             "JAVA_ARGS": self.__use_args(),
             "MIN_HEAP_SIZE": heaps[0],
             "MAX_HEAP_SIZE": heaps[1],
             "HOST_PORTS": self.ports,
         }
 
-    def __get_jar(self) -> str:
+    def __get_jar(self, name: str) -> str:
         while True:
             clear(0.5)
 
+            default = "proxy" if "proxy" in name else "server"
             jar: str = inquirer.text(  # type: ignore
                 message="Enter your .jar file name: ",
-                default="server.jar",
+                default=f"{default}.jar",
                 validate=EmptyInputValidator(),
             ).execute()
 
