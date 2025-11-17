@@ -54,6 +54,8 @@ poethepoet = "^0.37.0"
 [tool.poetry.group.test.dependencies]
 pytest = "^8.4.2"
 pytest-cov = "^7.0.0"
+pytest-modern = "^0.7.4"
+rich = "^14.2.0"
 
 [tool.poetry.scripts]
 MinecraftDockerCLI = "src.__main__:main"
@@ -203,12 +205,10 @@ python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
+    "-q",
+    "--color=yes",
     "--strict-markers",
     "--strict-config",
-    "--cov=APP",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-report=xml",
 ]
 markers = [
     "slow: marks tests as slow",
@@ -219,16 +219,7 @@ markers = [
 [tool.coverage.run]
 source = ["src"]
 omit = [
-    "*/tests/*",
-    "*/venv/*",
-    "*/__pycache__/*",
-]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if __name__ == .__main__.:",
+    "**/tests/**",
+    "**/venv/**",
+    "**/__pycache__/**"
 ]
