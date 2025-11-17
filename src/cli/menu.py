@@ -62,8 +62,7 @@ class Menus:
             "name": name,
             "build": {"context": f"./servers/{name}/"},
             "env_file": f"./servers/{name}/.env",
-            "volume": f"./servers/{name}:/{name}",
-            "working_dir": f"/{name}"
+            "working_dir": f"/{name}",
         }
 
         if ports:
@@ -179,8 +178,6 @@ class Menus:
 
         return {
             "CONTAINER_NAME": name,
-            "HOST_DIR": f"./servers/{name}",
-            "SERVER_DIR": f"/{name}",
             "SEVER_JAR": self.__get_jar(name),
             "JAVA_ARGS": self.__use_args(),
             "MIN_HEAP_SIZE": heaps[0],

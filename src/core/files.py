@@ -101,12 +101,15 @@ class FileManager:
             (dest_dir / "Dockerfile").write_bytes(dockerfile_bytes)
             (dest_dir / ".dockerignore").write_bytes(dockerignore_bytes)
             (dest_dir / "run.sh").write_bytes(runsh_bytes)
-            (dest_dir / "eula.txt").write_bytes(eula_bytes)
+
+            mc_dir = dest_dir.joinpath("data")
+            mc_dir.mkdir(parents=True, exist_ok=True)
+            (mc_dir / "eula.txt").write_bytes(eula_bytes)
 
             if "proxy" in service.lower():
-                plugins = dest_dir.joinpath("plugins")
+                plugins = mc_dir.joinpath("plugins")
                 plugins.mkdir(exist_ok=True)
-                self.__download_proxy(dest_dir)
+                self.__download_proxy(mc_dir)
 
         # Write top-level README into the given path
         (path / "README.md").write_bytes(readme_bytes)

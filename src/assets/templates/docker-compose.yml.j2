@@ -7,9 +7,6 @@ services:
     env_file:
       - {{ svc.env_file }}
     container_name: {{ svc.name }}
-    volumes:
-      - {{ svc.volume }}
-    working_dir: {{ svc.working_dir }}
 {% if svc.ports is defined %}
     ports:
 {% for p in svc.ports %}
