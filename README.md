@@ -4,7 +4,7 @@
 <div align="center">
     <img alt="license" title="License" src="https://custom-icon-badges.demolab.com/github/license/Dtar380/MinecraftDockerCLI?style=for-the-badge&logo=law&logoColor=white&labelColor=1155BA&color=236AD3" height=30>
     <img alt="stars" title="stars" src="https://custom-icon-badges.demolab.com/github/stars/Dtar380/MinecraftDockerCLI?style=for-the-badge&logo=star&logoColor=white&label=STARS&labelColor=9133D4&color=A444E0" height=30>
-    <img alt="downloads" title="downloads" src="https://custom-icon-badges.demolab.com/pypi/dm/MinecraftDockerCLI?style=for-the-badge&logo=download&logoColor=white&label=Downloads&labelColor=488207&color=55960C" height=30>
+    <img alt="downloads" title="downloads" src="https://img.shields.io/pypi/dm/MinecraftDockerCLI?style=for-the-badge&logo=download&logoColor=white&label=Downloads&labelColor=488207&color=55960C" height=30>
     <img alt="Visitors" title="Visitors" src="https://viewcounterpython.onrender.com/Dtar380/MinecraftDockerCLI">
     <img alt="open issues" title="open issues" src="https://custom-icon-badges.demolab.com/github/issues/Dtar380/MinecraftDockerCLI?style=for-the-badge&logo=issue-opened&logoColor=white&label=open%20issues&labelColor=CE4630&color=E05D44" height=30>
 </div>
