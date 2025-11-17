@@ -3,7 +3,6 @@
 #################################################
 from __future__ import annotations
 
-from gzip import GzipFile
 from pathlib import Path
 from subprocess import PIPE, CalledProcessError, CompletedProcess, run
 from time import strftime
@@ -67,12 +66,10 @@ class ComposeManager:
         return self.__run(*args)
 
     @yaspin(text="Putting Up Container...", color="cyan")
-    def up(
-        self, atached: bool = True, detach_keys: str = "ctrl-k"
-    ) -> CompletedProcess[str]:
+    def up(self, attached: bool = True) -> CompletedProcess[str]:
         args = ["up", "--build"]
-        if not atached:
-            args.extend(["-d", "--detach-keys", detach_keys])
+        if not attached:
+            args.extend(["-d"])
         return self.__run(*args)
 
     def open_terminal(self, service: str, detach_keys: str = "ctrl-k") -> None:

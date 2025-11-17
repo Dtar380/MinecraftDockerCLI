@@ -51,10 +51,10 @@ class Manager(CustomGroup):
 
     def up(self) -> Command:
         help = "Start up the containers after changes."
-        options = [Option(["--atached"], is_flag=True, default=False)]
+        options = [Option(["--attached"], is_flag=True, default=False)]
 
-        def callback(atached: bool = False) -> None:
-            self.compose_manager.up(atached)
+        def callback(attached: bool = False) -> None:
+            self.compose_manager.up(attached)
 
         return Command(
             name=inspect.currentframe().f_code.co_name,  # type: ignore
