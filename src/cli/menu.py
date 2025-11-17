@@ -175,11 +175,13 @@ class Menus:
     # Construct env file contents
     def env(self, name: str) -> dict[str, Any]:
         heaps = self.__get_heaps()
+        jar = self.__get_jar(name)
+        args = self.__use_args() or ""
 
         return {
             "CONTAINER_NAME": name,
-            "SEVER_JAR": self.__get_jar(name),
-            "JAVA_ARGS": self.__use_args(),
+            "SEVER_JAR": jar,
+            "JAVA_ARGS": args,
             "MIN_HEAP_SIZE": heaps[0],
             "MAX_HEAP_SIZE": heaps[1],
             "HOST_PORTS": self.ports,
@@ -189,7 +191,7 @@ class Menus:
         while True:
             clear(0.5)
 
-            default = "proxy" if "proxy" in name else "server"
+            default = "proxy" if "proxy" in name.lower() else "server"
             jar: str = inquirer.text(  # type: ignore
                 message="Enter your .jar file name: ",
                 default=f"{default}.jar",

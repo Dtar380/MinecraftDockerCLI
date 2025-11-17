@@ -72,7 +72,7 @@ class ComposeManager:
             args.extend(["-d"])
         return self.__run(*args)
 
-    def open_terminal(self, service: str, detach_keys: str = "ctrl-k") -> None:
+    def open_terminal(self, service: str, detach_keys: str = "ctrl-p,ctr-q") -> None:
         try:
             print(f"Use '{detach_keys}' to detach (press sequentially).\n")
             run(
