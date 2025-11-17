@@ -102,7 +102,7 @@ Stop:
 - Description: This command will
 
 Open:
-- 
+-
 
 ## **Tips & Troubleshooting**
 - Ensure Docker Desktop is running and you can run `docker ps` without errors before invoking the CLI.

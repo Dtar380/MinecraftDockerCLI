@@ -72,7 +72,9 @@ class ComposeManager:
             args.extend(["-d"])
         return self.__run(*args)
 
-    def open_terminal(self, service: str, detach_keys: str = "ctrl-p,ctr-q") -> None:
+    def open_terminal(
+        self, service: str, detach_keys: str = "ctrl-p,ctr-q"
+    ) -> None:
         try:
             print(f"Use '{detach_keys}' to detach (press sequentially).\n")
             run(
@@ -105,7 +107,9 @@ class ComposeManager:
         backup_path.mkdir(exist_ok=True)
         data: dict[str, Any] = self.file_manager.read_json(compose_json)
         services = data.get("compose", {}).get("services", []) or []  # type: ignore
-        names: list[str] = [svc.get("name") for svc in services if svc.get("name") is not None]  # type: ignore
+        names: list[str] = [
+            svc.get("name") for svc in services if svc.get("name") is not None  # type: ignore
+        ]
 
         print(names)
         for svc_name in names:
