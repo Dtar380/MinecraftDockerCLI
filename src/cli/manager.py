@@ -20,7 +20,7 @@ class Manager(CustomGroup):
     def __init__(self) -> None:
         super().__init__()
 
-    def open_terminal(self) -> Command:
+    def open(self) -> Command:
         help = "Open the terminal of a service."
         options = [Option(["--service"], type=self.service_type, default=None)]
 
@@ -51,10 +51,10 @@ class Manager(CustomGroup):
 
     def up(self) -> Command:
         help = "Start up the containers after changes."
-        options = [Option(["--detached"], is_flag=True, default=False)]
+        options = [Option(["--atached"], is_flag=True, default=False)]
 
-        def callback(detached: bool = False) -> None:
-            self.compose_manager.up(detached)
+        def callback(atached: bool = False) -> None:
+            self.compose_manager.up(atached)
 
         return Command(
             name=inspect.currentframe().f_code.co_name,  # type: ignore

@@ -67,11 +67,36 @@ class ComposeManager:
         return self.__run(*args)
 
     @yaspin("Putting Up Container...", color="cyan")
-    def up(self, detached: bool = True) -> CompletedProcess[str]:
-        args = ["up"]
-        if detached:
+    def up(self, atached: bool = True) -> CompletedProcess[str]:
+        args = ["up", "--build"]
+        if not atached:
             args.append("-d")
         return self.__run(*args)
+
+    def open_terminal(self, service: str, detach_keys: str = "ctrl-k") -> None:
+        try:
+            print(f"Use '{detach_keys}' to detach (press sequentially).\n")
+            run(
+                ["docker", "attach", "--detach-keys", detach_keys, service],
+                check=True
+            )
+            return
+        except CalledProcessError:
+            pass
+        except Exception:
+            pass
+    
+        for shell in ('/bin/bash', '/bin/sh'):
+            cmd = ["docker", "exec", "-it", service, shell]
+            try:
+                run(cmd, check=True)
+                return
+            except CalledProcessError:
+                continue
+            except Exception:
+                continue
+
+        print("Couldn't open a shell in the container")
 
     @yaspin("Backing Up Container...", color="cyan")
     def back_up(self, cwd: Path = Path.cwd()) -> None:
@@ -80,55 +105,43 @@ class ComposeManager:
 
         backup_path.mkdir(exist_ok=True)
         data: dict[str, Any] = self.file_manager.read_json(compose_json)
-        services = data.get("composer", {}).get("services", []) or []  # type: ignore
+        services = data.get("compose", {}).get("services", []) or []  # type: ignore
         names: list[str] = [svc.get("name") for svc in services if svc.get("name") is not None]  # type: ignore
+
+        print(names)
         for svc_name in names:
             tar_file = backup_path.joinpath(
                 f"{svc_name}_{strftime("%d-%m-%Y_%H:%M:%S")}.tar.gz"
             )
-            container_name = self.__get_container_name(svc_name)
-            if not container_name:
-                continue
 
-            path_inside = f"/{svc_name}"
-            with open(tar_file, "wb") as f:
+            path_inside = "/server"
+            print(svc_name)
+            try:
                 proc = run(
                     [
                         "docker",
                         "exec",
-                        container_name,
+                        svc_name,
                         "tar",
                         "-C",
                         path_inside,
-                        "-cv",
+                        "-czf",
+                        "-",
                         ".",
                     ],
                     stdout=PIPE,
+                    stderr=PIPE
                 )
-                with GzipFile(fileobj=f, mode="wb") as gz:
-                    gz.write(proc.stdout)
-
-    def __get_container_name(self, service_name: str) -> str | None:
-        result = self.__run("ps", capture_output=True)
-        lines = result.stdout.splitlines()
-        for line in lines[2:]:  # skip header
-            if service_name in line:
-                return line.split()[0]
-        return None
-
-    def open_terminal(self, service: str) -> None:
-        container = self.__get_container_name(service)
-        if not container:
-            print(f"Service: '{service}' not found.")
-            return
-        for shell in ("/bin/bash", "/bin/sh"):
-            cmd = ["docker", "exec", "-it", container, shell]
+            except Exception as exc:
+                print(f"Error running tar inside container {svc_name}: {exc}")
+                continue
+            if proc.returncode != 0:
+                err = proc.stderr.decode(errors='ignore')
+                print(f"tar failed for container {svc_name}: {err}")
+                continue
             try:
-                run(cmd, text=True)
-                return
-            except CalledProcessError:
+                with open(tar_file, "wb") as f:
+                    f.write(proc.stdout)
+            except Exception as exc:
+                print(f"Error writting backup file {tar_file}: {exc}")
                 continue
-            except Exception:
-                continue
-
-        print("Couldn't open a shell in the container")

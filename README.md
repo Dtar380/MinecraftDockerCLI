@@ -81,9 +81,9 @@ Backup:
 - Description: This command will create a backup of every service in a tar file with the format `{service_name}_{date}.tar.gz` inside a `.backup` directory.
 
 Up:
-- Help: Set up the containers and start them.
+- Help: Build the containers and start them. (This will overwrite the data inside with the host data)
 - Arguments:
-    - --detached: Flat to run the containers in detached mode.
+    - --atached: Flag to run the containers in atached mode.
 
 Down:
 - Help: Stop the containers and delete them.
@@ -91,7 +91,7 @@ Down:
     - --rm-volumes: Flag to remove volumes.
 
 > [!WARNING]
-> Running Up will overwrite the inside volumes of the container with host ones and down with --rm-files will remove the volumes inside the containers, make sure to create a backup and replace the files on host with the backups every time.
+> Running `Up` will overwrite the inside volumes of the container with host ones and down with --rm-files will remove the volumes inside the containers, make sure to create a backup and replace the files on host with the backups every time.
 
 Start:
 - Help: Start the containers.
@@ -100,6 +100,9 @@ Start:
 Stop:
 - Help: Stop the containers.
 - Description: This command will
+
+Open:
+- 
 
 ## **Tips & Troubleshooting**
 - Ensure Docker Desktop is running and you can run `docker ps` without errors before invoking the CLI.

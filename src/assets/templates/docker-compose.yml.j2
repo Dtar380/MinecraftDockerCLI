@@ -4,6 +4,8 @@ services:
     build:
       context: {{ svc.build.context }}
       dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
     env_file:
       - {{ svc.env_file }}
     container_name: {{ svc.name }}
