@@ -51,22 +51,22 @@ class ComposeManager:
         ]
         return services
 
-    @yaspin("Stopping Services...", color="cyan")
+    @yaspin(text="Stopping Services...", color="cyan")
     def stop(self) -> CompletedProcess[str]:
         return self.__run("stop")
 
-    @yaspin("Starting Services...", color="cyan")
+    @yaspin(text="Starting Services...", color="cyan")
     def start(self) -> CompletedProcess[str]:
         return self.__run("start")
 
-    @yaspin("Removing Container...", color="cyan")
+    @yaspin(text="Removing Container...", color="cyan")
     def down(self, remove_volumes: bool = False) -> CompletedProcess[str]:
         args = ["down"]
         if remove_volumes:
             args.append("-v")
         return self.__run(*args)
 
-    @yaspin("Putting Up Container...", color="cyan")
+    @yaspin(text="Putting Up Container...", color="cyan")
     def up(self, atached: bool = True) -> CompletedProcess[str]:
         args = ["up", "--build"]
         if not atached:
@@ -78,15 +78,15 @@ class ComposeManager:
             print(f"Use '{detach_keys}' to detach (press sequentially).\n")
             run(
                 ["docker", "attach", "--detach-keys", detach_keys, service],
-                check=True
+                check=True,
             )
             return
         except CalledProcessError:
             pass
         except Exception:
             pass
-    
-        for shell in ('/bin/bash', '/bin/sh'):
+
+        for shell in ("/bin/bash", "/bin/sh"):
             cmd = ["docker", "exec", "-it", service, shell]
             try:
                 run(cmd, check=True)
@@ -98,7 +98,7 @@ class ComposeManager:
 
         print("Couldn't open a shell in the container")
 
-    @yaspin("Backing Up Container...", color="cyan")
+    @yaspin(text="Backing Up Container...", color="cyan")
     def back_up(self, cwd: Path = Path.cwd()) -> None:
         backup_path = cwd.joinpath(".backup")
         compose_json = cwd.joinpath("data.json")
@@ -130,13 +130,13 @@ class ComposeManager:
                         ".",
                     ],
                     stdout=PIPE,
-                    stderr=PIPE
+                    stderr=PIPE,
                 )
             except Exception as exc:
                 print(f"Error running tar inside container {svc_name}: {exc}")
                 continue
             if proc.returncode != 0:
-                err = proc.stderr.decode(errors='ignore')
+                err = proc.stderr.decode(errors="ignore")
                 print(f"tar failed for container {svc_name}: {err}")
                 continue
             try:

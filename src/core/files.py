@@ -60,20 +60,20 @@ class FileManager:
 
         self.cwd.joinpath(".backup").mkdir(exist_ok=True)
 
-    @yaspin("Reading JSON...", color="cyan")
+    @yaspin(text="Reading JSON...", color="cyan")
     def read_json(self, file: Path) -> dict[Any, Any]:
         with open(file, "r+") as f:
             data = dict(json.load(f))
         return data
 
-    @yaspin("Writting JSON...", color="cyan")
+    @yaspin(text="Writting JSON...", color="cyan")
     def write_json(self, file: Path, data: dict[Any, Any]) -> None:
         data_str = json.dumps(data, indent=2)
         with open(file, "w+") as f:
             f.write(data_str)
         return None
 
-    @yaspin("Copying files...", color="cyan")
+    @yaspin(text="Copying files...", color="cyan")
     def copy_files(self, path: Path, services: list[str]) -> None:
         docker_pkg = files("src.assets.docker")
         dockerfile_res = docker_pkg.joinpath("Dockerfile")
@@ -164,7 +164,7 @@ class FileManager:
         except Exception:
             return
 
-    @yaspin("Rendering template...", color="cyan")
+    @yaspin(text="Rendering template...", color="cyan")
     def template_to_file(
         self, template_path: Path, context: dict[Any, Any], dest_path: Path
     ) -> Path:
