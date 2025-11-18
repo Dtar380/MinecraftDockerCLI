@@ -61,10 +61,13 @@ class FileManager:
         self.cwd.joinpath(".backup").mkdir(exist_ok=True)
 
     @yaspin(text="Reading JSON...", color="cyan")
-    def read_json(self, file: Path) -> dict[Any, Any]:
-        with open(file, "r+") as f:
-            data = dict(json.load(f))
-        return data
+    def read_json(self, file: Path) -> dict[Any, Any] | None:
+        try:
+            with open(file, "r+") as f:
+                data = dict(json.load(f))
+            return data
+        except Exception:
+            return None
 
     @yaspin(text="Writting JSON...", color="cyan")
     def write_json(self, file: Path, data: dict[Any, Any]) -> None:

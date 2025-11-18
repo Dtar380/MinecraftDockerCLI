@@ -23,6 +23,10 @@ dicts = dict[str, Any]
 
 class Builder(CustomGroup):
 
+    no_json: str = "ERROR: Missing JSON file for services. Use 'create' first."
+    no_data: str = "ERROR: JSON file is empty. Use 'create' first."
+    no_services: str = "ERROR: No services found. Use 'create' first."
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -114,11 +118,13 @@ class Builder(CustomGroup):
             path: Path = self.cwd.joinpath("data.json")
 
             if not path.exists():
-                exit(
-                    "ERROR: Missing JSON file for services. Use 'create' first."
-                )
+                exit(self.no_json)
 
             data: dicts = self.file_manager.read_json(path) or {}
+
+            if not data:
+                exit(self.no_data)
+
             compose: dicts = data.get("compose", {}) or {}
 
             services_list: list[dicts] = compose.get("services", []) or []
@@ -134,7 +140,7 @@ class Builder(CustomGroup):
             }
 
             if not services:
-                exit("ERROR: No services found. Use 'create' first.")
+                exit(self.no_services)
 
             def find_index_by_name(name: str) -> int | None:
                 for i, s in enumerate(services_list):
@@ -232,14 +238,12 @@ class Builder(CustomGroup):
             path: Path = self.cwd.joinpath("data.json")
 
             if not path.exists():
-                exit(
-                    "ERROR: Missing JSON file for services. Use 'create' first."
-                )
+                exit(self.no_json)
 
             data: dicts = self.file_manager.read_json(path) or {}
 
             if not data:
-                exit("ERROR: JSON file is empty. Use 'create' first.")
+                exit(self.no_data)
 
             clear(0)
             self.file_manager.save_files(data, build=True)

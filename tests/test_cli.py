@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+from importlib import import_module
+from typing import Any
+
 from click import Context
-from click.testing import CliRunner  # type: ignore
-import pytest  # type: ignore
+from click.testing import CliRunner
+import pytest
+
+from .__vars__ import *
 
 
 class Test_CLI:
@@ -22,3 +29,316 @@ class Test_CLI:
         for command in commands:
             result = self.runner.invoke(self.cli, [command, "--help"])
             assert result.exit_code == 0
+
+    # BUILDER
+    def test_create(
+        self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        service = s1
+        env = e1
+
+        from src.cli.builder import Builder
+        monkeypatch.setattr(
+            Builder,
+            "_Builder__get_data",
+            lambda self, menu, name=None: (service, env)  # type: ignore
+        )
+
+        result = self.runner.invoke(self.cli, ["create"])
+        assert result.exit_code == 0
+        assert "Files saved!" in result.output
+
+        base = isolate_cwd
+        assert (base / "data.json").exists()
+        data = json.loads((base / "data.json").read_text(encoding="utf-8"))
+        assert data is not None
+
+        services = data.get("compose", {}).get("services", [])
+        assert len(services) == 1
+        assert services[0] == service
+
+        networks = data.get("compose", {}).get("networks", [])
+        assert len(networks) == 0
+
+        envs = data.get("envs", [])
+        assert len(envs) == 1
+        assert envs[0] == env
+
+        assert (base / "docker-compose.yml").exists()
+        expected = self.__render_template(
+            data=data.get("compose"),
+            template_name="docker-compose.yml.j2"
+        )
+        actual = (base / "docker-compose.yml").read_text(encoding="utf-8")
+        assert expected == actual
+
+        name = services[0].get("name")
+
+        assert (base / "servers" / name / ".env").exists()
+        expected = self.__render_template(
+            data=envs[0], template_name=".env.j2"
+        )
+        actual = (base / "servers" / name / ".env").read_text(encoding="utf-8")
+        assert expected == actual
+
+        assert (base / "servers" / name / "Dockerfile").exists()
+        assert (base / "servers" / name / "run.sh").exists()
+        assert (base / "servers" / name / "data" / "eula.txt").exists()
+
+    def test_create_network(
+        self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from src.cli.builder import Builder
+
+        seq = [(s1, e1), (s2, e2)]
+        def get_data(
+            self: Any, menu: Any, name: str | None = None
+        ) -> tuple[dicts, dicts]:
+            try:
+                return seq.pop(0)
+            except IndexError:
+                return (s2, e2)
+
+        monkeypatch.setattr(
+            Builder,
+            "_Builder__get_data",
+            get_data
+        )
+        monkeypatch.setattr(
+            Builder,
+            "_Builder__get_name",
+            lambda self, message, network=False: "network"  # type: ignore
+        )
+
+        cli_utils = import_module("src.utils.cli")
+        builder_mod = import_module("src.cli.builder")
+        menu_mod = import_module("src.cli.menu")
+
+        monkeypatch.setattr(cli_utils, "clear", lambda t: None)  # type: ignore
+        monkeypatch.setattr(builder_mod, "clear", lambda t: None)  # type: ignore
+        monkeypatch.setattr(menu_mod, "clear", lambda t: None)  # type: ignore
+
+        confirms = [True, True, False]
+
+        def fake_confirm(msg: str, default: bool = True) -> bool:
+            try:
+                return confirms.pop(0)
+            except IndexError:
+                return True
+
+        monkeypatch.setattr(cli_utils, "confirm", fake_confirm)
+        monkeypatch.setattr(builder_mod, "confirm", fake_confirm)
+        monkeypatch.setattr(menu_mod, "confirm", fake_confirm)
+
+        result = self.runner.invoke(self.cli, ["create", "--network"])
+        assert result.exit_code == 0
+
+        base = isolate_cwd
+        assert (base / "data.json").exists()
+        data = json.loads((base / "data.json").read_text(encoding="utf-8"))
+        assert data is not None
+
+        services = data.get("compose", {}).get("services", [])
+        assert len(services) == 2
+        for svc_json, svc_expected in zip(services, (s1, s2)):
+            assert svc_json == svc_expected
+
+        networks = data.get("compose", {}).get("networks", [])
+        assert len(networks) == 1
+        assert "network" == networks[0]
+
+        envs = data.get("envs", [])
+        assert len(envs) == 2
+        for env_json, env_expected in zip(envs, (e1, e2)):
+            assert env_json == env_expected
+
+        assert (base / "docker-compose.yml").exists()
+        expected = self.__render_template(
+            data=data.get("compose"),
+            template_name="docker-compose.yml.j2"
+        )
+        actual = (base / "docker-compose.yml").read_text(encoding="utf-8")
+        assert expected == actual
+
+        names = sorted([s.get("name") for s in services])
+        for i, name in enumerate(names):
+            assert (base / "servers" / name / ".env").exists()
+            expected = self.__render_template(
+                data=envs[i], template_name=".env.j2"
+            )
+            actual = (base / "servers" / name / ".env").read_text(encoding="utf-8")
+            assert expected == actual
+
+            assert (base / "servers" / name / "Dockerfile").exists()
+            assert (base / "servers" / name / "run.sh").exists()
+            assert (base / "servers" / name / "data" / "eula.txt").exists()
+
+    def test_update_errors(self, isolate_cwd: Path) -> None:
+        base = isolate_cwd
+        if (base / "data.json").exists():
+            (base / "data.json").unlink()
+
+        result = self.runner.invoke(self.cli, ["update"])
+        assert result.exit_code != 0
+        assert "ERROR: Missing JSON file for services. Use 'create' first." in result.output
+
+        (base / "data.json").write_text(data="")
+        result = self.runner.invoke(self.cli, ["update"])
+        assert result.exit_code != 0
+        print(result.output)
+        assert "ERROR: JSON file is empty. Use 'create' first." in result.output
+
+        (base / "data.json").write_text(
+            data=json.dumps({
+                "compose": {
+                    "services": [],
+                    "networks": []
+                },
+                "envs": []
+            }, indent=2),
+            encoding="utf-8"
+        )
+        result = self.runner.invoke(self.cli, ["update"])
+        assert result.exit_code != 0
+        print(result.output)
+        assert "ERROR: No services found. Use 'create' first." in result.output
+
+    def test_update_remove(
+        self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        base = isolate_cwd
+
+        data: dicts = {
+            "compose": {
+                "services": [s1, s2],
+                "network": ["network"]
+            },
+            "envs": [e1, e2]
+        }
+        (base / "data.json").write_text(
+            json.dumps(data, indent=2), encoding="utf-8"
+        )
+
+        cli_utils = import_module("src.utils.cli")
+        builder_mod = import_module("src.cli.builder")
+        menu_mod = import_module("src.cli.menu")
+
+        monkeypatch.setattr(cli_utils, "clear", lambda t: None)  # type: ignore
+        monkeypatch.setattr(builder_mod, "clear", lambda t: None)  # type: ignore
+        monkeypatch.setattr(menu_mod, "clear", lambda t: None)  # type: ignore
+
+        monkeypatch.setattr(cli_utils, "confirm", lambda msg, default=True: True)  # type: ignore
+        monkeypatch.setattr(builder_mod, "confirm", lambda msg, default=True: True)  # type: ignore
+        monkeypatch.setattr(menu_mod, "confirm", lambda msg, default=True: True)  # type: ignore
+
+        result = self.runner.invoke(self.cli, ["update", "--service", "server1", "--remove"])
+        assert result.exit_code == 0
+        assert "removed and files updated." in result.output
+
+        data_after = json.loads((base / "data.json").read_text(encoding="utf-8"))
+        services_after = data_after.get("compose", {}).get("services", [])
+        envs_after = data_after.get("envs", [])
+        assert all(s.get("name") != "server1" for s in services_after)
+        assert all(e.get("CONTAINER_NAME") != "server1" for e in envs_after)
+
+    def test_update_add(
+        self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        base = isolate_cwd
+
+        data: dicts = {
+            "compose": {
+                "services": [s1],
+                "network": ["network"]
+            },
+            "envs": [e1]
+        }
+        (base / "data.json").write_text(
+            json.dumps(data, indent=2), encoding="utf-8"
+        )
+
+        new_service = s2
+        new_service.pop("name")
+        new_env = e2
+        new_env.pop("CONTAINER_NAME")
+
+        from src.cli.builder import Builder
+        monkeypatch.setattr(
+            Builder,
+            "_Builder__get_data",
+            lambda self, menu, name=None: (s2, e2)  # type: ignore
+        )
+
+        cli_utils = import_module("src.utils.cli")
+        builder_mod = import_module("src.cli.builder")
+        menu_mod = import_module("src.cli.menu")
+
+        monkeypatch.setattr(cli_utils, "clear", lambda t: None)  # type: ignore
+        monkeypatch.setattr(builder_mod, "clear", lambda t: None)  # type: ignore
+        monkeypatch.setattr(menu_mod, "clear", lambda t: None)  # type: ignore
+
+        monkeypatch.setattr(cli_utils, "confirm", lambda msg, default=True: True)  # type: ignore
+        monkeypatch.setattr(builder_mod, "confirm", lambda msg, default=True: True)  # type: ignore
+        monkeypatch.setattr(menu_mod, "confirm", lambda msg, default=True: True)  # type: ignore
+
+        result = self.runner.invoke(self.cli, ["update", "--service", "new", "--add"])
+        assert result.exit_code == 0
+
+        data_after = json.loads((base / "data.json").read_text(encoding="utf-8"))
+        services_after = data_after.get("compose", {}).get("services", [])
+        envs_after = data_after.get("envs", [])
+
+        service_names = [s.get("name") for s in services_after]
+        assert "new" in service_names
+        env_names = [e.get("CONTAINER_NAME") for e in envs_after]
+        assert "new" in env_names
+
+    def test_build_errors(self, isolate_cwd: Path) -> None:
+        base = isolate_cwd
+        if (base / "data.json").exists():
+            (base / "data.json").unlink()
+
+        result = self.runner.invoke(self.cli, ["build"])
+        assert result.exit_code != 0
+        assert "ERROR: Missing JSON file for services. Use 'create' first." in result.output
+
+        (base / "data.json").write_text(data="")
+        result = self.runner.invoke(self.cli, ["build"])
+        assert result.exit_code != 0
+        print(result.output)
+        assert "ERROR: JSON file is empty. Use 'create' first." in result.output
+
+    def test_build(self, isolate_cwd: Path) -> None:
+        base = isolate_cwd
+
+        root = Path(__file__).resolve().parent.parent
+        template = root / "src" / "assets" / "templates" / "template.json"
+        with open(template, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        (base / "data.json").write_text(
+            json.dumps(data, indent=2), encoding="utf-8"
+        )
+
+        result = self.runner.invoke(self.cli, ["build"])
+        assert result.exit_code == 0
+        assert "Files saved!" in result.output
+
+        assert (base / "docker-compose.yml").exists()
+        assert (base / "servers" / "server" / ".env").exists()
+        assert (base / "servers" / "server" / "Dockerfile").exists()
+        assert (base / "servers" / "server" / "run.sh").exists()
+        assert (base / "servers" / "server" / "data" / "eula.txt").exists()
+
+    def __render_template(self, data: dicts, template_name: str) -> str:
+        import jinja2
+
+        root = Path(__file__).resolve().parent.parent
+        template_dir = root / "src" / "assets" / "templates"
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(template_dir.__str__()),
+            trim_blocks=True,
+            lstrip_blocks=True
+        )
+        template = env.get_template(template_name)
+        return template.render(**data)

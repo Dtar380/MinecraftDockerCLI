@@ -7,16 +7,11 @@
           "context": "./servers/server/"
         },
         "env_file": "./servers/server/.env",
-        "volume": "server_data:/server",
         "ports": [
-          "${HOST_PORT}:${HOST_PORT}"
+          "25565:25565"
         ],
-        "expose": [
-          "${HOST_PORT}"
-        ],
-        "networks": [
-          "mc-network"
-        ],
+        "expose": [],
+        "networks": [],
         "resources": {
           "limits": {
             "cpus": 1,
@@ -29,20 +24,15 @@
         }
       }
     ],
-    "volumes": [
-      "server_data"
-    ],
-    "networks": [
-      "mc-network"
-    ]
+    "networks": []
   },
   "envs": [
     {
       "CONTAINER_NAME": "server",
-      "SERVER_JAR": "",
+      "SERVER_JAR": "server.jar",
       "JAVA_ARGS": "",
-      "MIN_HEAP_SIZE": "",
-      "MAX_HEAP_SIZE": "",
+      "MIN_HEAP_SIZE": "256M",
+      "MAX_HEAP_SIZE": "1024M",
       "HOST_PORTS": {
         "HOST_PORT": 25565
       }
