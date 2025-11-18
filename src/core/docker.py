@@ -107,7 +107,9 @@ class ComposeManager:
         compose_json = cwd.joinpath("data.json")
 
         backup_path.mkdir(exist_ok=True)
-        data: dict[str, Any] = self.file_manager.read_json(compose_json)
+        data: dict[str, Any] = self.file_manager.read_json(compose_json) or {}
+        if not data:
+            exit("ERROR: data.json is empty")
         services = data.get("compose", {}).get("services", []) or []  # type: ignore
         names: list[str] = [
             svc.get("name") for svc in services if svc.get("name") is not None  # type: ignore
