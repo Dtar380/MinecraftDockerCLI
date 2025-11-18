@@ -1,13 +1,13 @@
 from __future__ import annotations
 
+from importlib import import_module
 import json
 from pathlib import Path
-from importlib import import_module
 from typing import Any
 
 from click import Context
 from click.testing import CliRunner
-import pytest
+import pytest  # type: ignore
 
 from .__vars__ import *
 
@@ -17,6 +17,7 @@ class Test_CLI:
     def setup_method(self) -> None:
         self.runner = CliRunner()
         from src import cli
+
         self.cli = cli
 
     # HELP
@@ -38,10 +39,11 @@ class Test_CLI:
         env = e1
 
         from src.cli.builder import Builder
+
         monkeypatch.setattr(
             Builder,
             "_Builder__get_data",
-            lambda self, menu, name=None: (service, env)  # type: ignore
+            lambda self, menu, name=None: (service, env),  # type: ignore
         )
 
         result = self.runner.invoke(self.cli, ["create"])
@@ -66,8 +68,7 @@ class Test_CLI:
 
         assert (base / "docker-compose.yml").exists()
         expected = self.__render_template(
-            data=data.get("compose"),
-            template_name="docker-compose.yml.j2"
+            data=data.get("compose"), template_name="docker-compose.yml.j2"
         )
         actual = (base / "docker-compose.yml").read_text(encoding="utf-8")
         assert expected == actual
@@ -75,9 +76,7 @@ class Test_CLI:
         name = services[0].get("name")
 
         assert (base / "servers" / name / ".env").exists()
-        expected = self.__render_template(
-            data=envs[0], template_name=".env.j2"
-        )
+        expected = self.__render_template(data=envs[0], template_name=".env.j2")
         actual = (base / "servers" / name / ".env").read_text(encoding="utf-8")
         assert expected == actual
 
@@ -91,6 +90,7 @@ class Test_CLI:
         from src.cli.builder import Builder
 
         seq = [(s1, e1), (s2, e2)]
+
         def get_data(
             self: Any, menu: Any, name: str | None = None
         ) -> tuple[dicts, dicts]:
@@ -99,15 +99,11 @@ class Test_CLI:
             except IndexError:
                 return (s2, e2)
 
-        monkeypatch.setattr(
-            Builder,
-            "_Builder__get_data",
-            get_data
-        )
+        monkeypatch.setattr(Builder, "_Builder__get_data", get_data)
         monkeypatch.setattr(
             Builder,
             "_Builder__get_name",
-            lambda self, message, network=False: "network"  # type: ignore
+            lambda self, message, network=False: "network",  # type: ignore
         )
 
         cli_utils = import_module("src.utils.cli")
@@ -154,8 +150,7 @@ class Test_CLI:
 
         assert (base / "docker-compose.yml").exists()
         expected = self.__render_template(
-            data=data.get("compose"),
-            template_name="docker-compose.yml.j2"
+            data=data.get("compose"), template_name="docker-compose.yml.j2"
         )
         actual = (base / "docker-compose.yml").read_text(encoding="utf-8")
         assert expected == actual
@@ -166,7 +161,9 @@ class Test_CLI:
             expected = self.__render_template(
                 data=envs[i], template_name=".env.j2"
             )
-            actual = (base / "servers" / name / ".env").read_text(encoding="utf-8")
+            actual = (base / "servers" / name / ".env").read_text(
+                encoding="utf-8"
+            )
             assert expected == actual
 
             assert (base / "servers" / name / "Dockerfile").exists()
@@ -180,7 +177,10 @@ class Test_CLI:
 
         result = self.runner.invoke(self.cli, ["update"])
         assert result.exit_code != 0
-        assert "ERROR: Missing JSON file for services. Use 'create' first." in result.output
+        assert (
+            "ERROR: Missing JSON file for services. Use 'create' first."
+            in result.output
+        )
 
         (base / "data.json").write_text(data="")
         result = self.runner.invoke(self.cli, ["update"])
@@ -189,14 +189,11 @@ class Test_CLI:
         assert "ERROR: JSON file is empty. Use 'create' first." in result.output
 
         (base / "data.json").write_text(
-            data=json.dumps({
-                "compose": {
-                    "services": [],
-                    "networks": []
-                },
-                "envs": []
-            }, indent=2),
-            encoding="utf-8"
+            data=json.dumps(
+                {"compose": {"services": [], "networks": []}, "envs": []},
+                indent=2,
+            ),
+            encoding="utf-8",
         )
         result = self.runner.invoke(self.cli, ["update"])
         assert result.exit_code != 0
@@ -209,11 +206,8 @@ class Test_CLI:
         base = isolate_cwd
 
         data: dicts = {
-            "compose": {
-                "services": [s1, s2],
-                "network": ["network"]
-            },
-            "envs": [e1, e2]
+            "compose": {"services": [s1, s2], "network": ["network"]},
+            "envs": [e1, e2],
         }
         (base / "data.json").write_text(
             json.dumps(data, indent=2), encoding="utf-8"
@@ -231,11 +225,15 @@ class Test_CLI:
         monkeypatch.setattr(builder_mod, "confirm", lambda msg, default=True: True)  # type: ignore
         monkeypatch.setattr(menu_mod, "confirm", lambda msg, default=True: True)  # type: ignore
 
-        result = self.runner.invoke(self.cli, ["update", "--service", "server1", "--remove"])
+        result = self.runner.invoke(
+            self.cli, ["update", "--service", "server1", "--remove"]
+        )
         assert result.exit_code == 0
         assert "removed and files updated." in result.output
 
-        data_after = json.loads((base / "data.json").read_text(encoding="utf-8"))
+        data_after = json.loads(
+            (base / "data.json").read_text(encoding="utf-8")
+        )
         services_after = data_after.get("compose", {}).get("services", [])
         envs_after = data_after.get("envs", [])
         assert all(s.get("name") != "server1" for s in services_after)
@@ -247,11 +245,8 @@ class Test_CLI:
         base = isolate_cwd
 
         data: dicts = {
-            "compose": {
-                "services": [s1],
-                "network": ["network"]
-            },
-            "envs": [e1]
+            "compose": {"services": [s1], "network": ["network"]},
+            "envs": [e1],
         }
         (base / "data.json").write_text(
             json.dumps(data, indent=2), encoding="utf-8"
@@ -263,10 +258,11 @@ class Test_CLI:
         new_env.pop("CONTAINER_NAME")
 
         from src.cli.builder import Builder
+
         monkeypatch.setattr(
             Builder,
             "_Builder__get_data",
-            lambda self, menu, name=None: (s2, e2)  # type: ignore
+            lambda self, menu, name=None: (s2, e2),  # type: ignore
         )
 
         cli_utils = import_module("src.utils.cli")
@@ -281,10 +277,14 @@ class Test_CLI:
         monkeypatch.setattr(builder_mod, "confirm", lambda msg, default=True: True)  # type: ignore
         monkeypatch.setattr(menu_mod, "confirm", lambda msg, default=True: True)  # type: ignore
 
-        result = self.runner.invoke(self.cli, ["update", "--service", "new", "--add"])
+        result = self.runner.invoke(
+            self.cli, ["update", "--service", "new", "--add"]
+        )
         assert result.exit_code == 0
 
-        data_after = json.loads((base / "data.json").read_text(encoding="utf-8"))
+        data_after = json.loads(
+            (base / "data.json").read_text(encoding="utf-8")
+        )
         services_after = data_after.get("compose", {}).get("services", [])
         envs_after = data_after.get("envs", [])
 
@@ -300,7 +300,10 @@ class Test_CLI:
 
         result = self.runner.invoke(self.cli, ["build"])
         assert result.exit_code != 0
-        assert "ERROR: Missing JSON file for services. Use 'create' first." in result.output
+        assert (
+            "ERROR: Missing JSON file for services. Use 'create' first."
+            in result.output
+        )
 
         (base / "data.json").write_text(data="")
         result = self.runner.invoke(self.cli, ["build"])
@@ -338,7 +341,7 @@ class Test_CLI:
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(template_dir.__str__()),
             trim_blocks=True,
-            lstrip_blocks=True
+            lstrip_blocks=True,
         )
         template = env.get_template(template_name)
         return template.render(**data)

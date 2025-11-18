@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import pytest
-from click.testing import CliRunner
 from pathlib import Path
+
+from click.testing import CliRunner
+import pytest  # type: ignore
 
 
 @pytest.fixture()
@@ -43,9 +44,9 @@ def isolate_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
             monkeypatch.setattr(cm_cls, "cwd", tmp_path, raising=False)
     else:
         # Fallback: import modules directly
-        import src.core.files as _files
-        import src.core.docker as _docker
         import src.cli.custom_group as _cg
+        import src.core.docker as _docker
+        import src.core.files as _files
 
         monkeypatch.setattr(_cg.CustomGroup, "cwd", tmp_path, raising=False)
         monkeypatch.setattr(_files.FileManager, "cwd", tmp_path, raising=False)

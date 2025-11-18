@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 dicts = dict[str, Any]
@@ -10,15 +12,9 @@ s1: dicts = {
     "expose": [],
     "networks": [],
     "resources": {
-        "limits": {
-            "cpus": 1,
-            "memory": "1g"
-        },
-        "reservations": {
-            "cpus": 1,
-            "memory": "1g"
-        }
-    }
+        "limits": {"cpus": 1, "memory": "1g"},
+        "reservations": {"cpus": 1, "memory": "1g"},
+    },
 }
 
 s2: dicts = {
@@ -29,15 +25,9 @@ s2: dicts = {
     "expose": [],
     "networks": [],
     "resources": {
-        "limits": {
-            "cpus": 1,
-            "memory": "1g"
-        },
-        "reservations": {
-            "cpus": 1,
-            "memory": "1g"
-        }
-    }
+        "limits": {"cpus": 1, "memory": "1g"},
+        "reservations": {"cpus": 1, "memory": "1g"},
+    },
 }
 
 e1: dicts = {
@@ -46,9 +36,7 @@ e1: dicts = {
     "JAVA_ARGS": "",
     "MIN_HEAP_SIZE": "256M",
     "MAX_HEAP_SIZE": "1024M",
-    "HOST_PORTS": {
-        "HOST_PORT": 25565
-    }
+    "HOST_PORTS": {"HOST_PORT": 25565},
 }
 
 e2: dicts = {
@@ -57,7 +45,5 @@ e2: dicts = {
     "JAVA_ARGS": "",
     "MIN_HEAP_SIZE": "256M",
     "MAX_HEAP_SIZE": "1024M",
-    "HOST_PORTS": {
-        "HOST_PORT": 25565
-    }
+    "HOST_PORTS": {"HOST_PORT": 25565},
 }
