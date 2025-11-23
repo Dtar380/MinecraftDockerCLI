@@ -183,7 +183,7 @@ class Menus:
 
         return {
             "CONTAINER_NAME": name,
-            "SEVER_JAR": self.jar_file,
+            "SERVER_JAR": self.jar_file,
             "JAVA_ARGS": args,
             "MIN_HEAP_SIZE": heaps[0],
             "MAX_HEAP_SIZE": heaps[1],
@@ -282,7 +282,5 @@ class Menus:
             choices.extend(version)
 
         return inquirer.select(  # type: ignore
-            message="Select the version: ",
-            choices=choices,
-            validate=EmptyInputValidator(),
+            message="Select the version: ", choices=choices
         ).execute()

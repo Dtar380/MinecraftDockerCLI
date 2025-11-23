@@ -25,14 +25,16 @@ class Downloader:
 
         self.api = api.rstrip("/")
 
-    def build_url(self, endpoint: str) -> str:
+    def __build_url(self, endpoint: str) -> str:
         if endpoint.startswith("http"):
             return endpoint
-        return f"{self.api}/{endpoint.lstrip('/')}"
+        return f"{self.api}/{endpoint.lstrip('/').rstrip('/')}"
 
     def get(self, endpoint: str, **kwargs: dict[str, Any]) -> Any:
-        url = self.build_url(endpoint)
-        return self.session.get(url, **kwargs).json()  # type: ignore
+        url = self.__build_url(endpoint)
+        response = self.session.get(url, **kwargs)  # type: ignore
+        response.raise_for_status()
+        return response.json()
 
     def download_latest(
         self,
@@ -47,7 +49,7 @@ class Downloader:
         try:
             if not version:
                 version = list(versions.get("versions").values())[0][0]
-            endpoint += f"versions/{version}"
+            endpoint += f"/versions/{version}"
         except Exception:
             return
 
@@ -56,7 +58,7 @@ class Downloader:
             return
         try:
             build = list(builds.get("builds"))[0]
-            endpoint += "builds/" + build
+            endpoint += f"/builds/{build}"
         except Exception:
             return
 
@@ -78,7 +80,7 @@ class Downloader:
         self.__download_file(download_url, out_path)
 
     def __download_file(self, endpoint: str, path: Path) -> None:
-        url = self.build_url(endpoint)
+        url = self.__build_url(endpoint)
 
         with self.session.get(url, stream=True) as response:
             response.raise_for_status()
