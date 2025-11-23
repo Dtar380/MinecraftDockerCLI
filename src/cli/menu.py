@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from InquirerPy import inquirer  # type: ignore
+from InquirerPy.base.control import Choice  # type: ignore
 from InquirerPy.validator import EmptyInputValidator  # type: ignore
 from importlib_resources import files  # type: ignore
 import psutil  # type: ignore
@@ -37,6 +38,8 @@ class Menus:
         if self.memory < 512:
             print("WARNING: RAM AMOUNT TOO LOW")
         clear(1)
+
+        self.jar_file: str | None
 
     # Construct service contents for docker-compose
     def service(self, name: str) -> dict[str, Any]:
@@ -175,12 +178,12 @@ class Menus:
     # Construct env file contents
     def env(self, name: str) -> dict[str, Any]:
         heaps = self.__get_heaps()
-        jar = self.__get_jar(name)
+        self.jar_file = self.__get_jar(name)
         args = self.__use_args() or ""
 
         return {
             "CONTAINER_NAME": name,
-            "SEVER_JAR": jar,
+            "SEVER_JAR": self.jar_file,
             "JAVA_ARGS": args,
             "MIN_HEAP_SIZE": heaps[0],
             "MAX_HEAP_SIZE": heaps[1],
@@ -243,3 +246,43 @@ class Menus:
                 break
 
         return [f"{min_heap_size}M", f"{max_heap_size}M"]
+
+    def service_files(self, name: str) -> dict[str, Any]:
+        type = self.__get_server_type(name)
+
+        files: dict[str, Any] = {
+            "name": name,
+            "server": {
+                "jar_file": self.jar_file,
+                "type": type,
+                "version": self.__get_version(type),
+            },
+        }
+
+        return files
+
+    def __get_server_type(self, name: str) -> str:
+        choices = (
+            ["folia", "paper"] if "proxy" not in name.lower() else ["velocity"]
+        )
+        return inquirer.select(  # type: ignore
+            message="Choose server type: ",
+            choices=choices,
+            validate=EmptyInputValidator(),
+        ).execute()
+
+    def __get_version(self, type: str) -> str | None:
+        import requests  # type: ignore
+
+        response = requests.get(f"https://fill.papermc.io/v3/projects/{type}")
+        json_response = response.json()
+        versions: dict[str, list[str]] = json_response.get("versions", {}) or {}
+        choices: list[Any] = [Choice(value=None, name="Latest")]
+        for version in versions.values():
+            choices.extend(version)
+
+        return inquirer.select(  # type: ignore
+            message="Select the version: ",
+            choices=choices,
+            validate=EmptyInputValidator(),
+        ).execute()

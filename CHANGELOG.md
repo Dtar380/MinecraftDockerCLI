@@ -1,6 +1,19 @@
 # CHANGELOG
 All released versions changes will be tracked and documented in this file.
 
+## [0.3](https://github.com/Dtar380/VideoService/releases/tag/0.3.0) - 23th November 2025
+Added functionality to download a server.jar using official PaperMC API.
+You can download either folia, paper or velocity servers.
+
+### Added
+- Downloader class
+
+### Changed
+- template.json
+- Builder class
+- Menus class
+- FileManager class
+
 ## [0.2](https://github.com/Dtar380/VideoService/releases/tag/0.2.0) - 23th November 2025
 This release implemented unit tests
 

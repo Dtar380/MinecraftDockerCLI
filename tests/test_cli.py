@@ -37,13 +37,14 @@ class Test_CLI:
     ) -> None:
         service = s1
         env = e1
+        service_files = f1
 
         from src.cli.builder import Builder
 
         monkeypatch.setattr(
             Builder,
             "_Builder__get_data",
-            lambda self, menu, name=None: (service, env),  # type: ignore
+            lambda self, menu, name=None: (service, env, service_files),  # type: ignore
         )
 
         result = self.runner.invoke(self.cli, ["create"])
@@ -89,15 +90,15 @@ class Test_CLI:
     ) -> None:
         from src.cli.builder import Builder
 
-        seq = [(s1, e1), (s2, e2)]
+        seq = [(s1, e1, f1), (s2, e2, f2)]
 
         def get_data(
             self: Any, menu: Any, name: str | None = None
-        ) -> tuple[dicts, dicts]:
+        ) -> tuple[dicts, dicts, dicts]:
             try:
                 return seq.pop(0)
             except IndexError:
-                return (s2, e2)
+                return (s2, e2, f2)
 
         monkeypatch.setattr(Builder, "_Builder__get_data", get_data)
         monkeypatch.setattr(
@@ -208,6 +209,7 @@ class Test_CLI:
         data: dicts = {
             "compose": {"services": [s1, s2], "network": ["network"]},
             "envs": [e1, e2],
+            "service_files": [f1, f2],
         }
         (base / "data.json").write_text(
             json.dumps(data, indent=2), encoding="utf-8"
@@ -247,6 +249,7 @@ class Test_CLI:
         data: dicts = {
             "compose": {"services": [s1], "network": ["network"]},
             "envs": [e1],
+            "service_files": [f1],
         }
         (base / "data.json").write_text(
             json.dumps(data, indent=2), encoding="utf-8"
@@ -256,13 +259,15 @@ class Test_CLI:
         new_service.pop("name")
         new_env = e2
         new_env.pop("CONTAINER_NAME")
+        new_svc_files = f2
+        new_svc_files.pop("name")
 
         from src.cli.builder import Builder
 
         monkeypatch.setattr(
             Builder,
             "_Builder__get_data",
-            lambda self, menu, name=None: (s2, e2),  # type: ignore
+            lambda self, menu, name=None: (s2, e2, f2),  # type: ignore
         )
 
         cli_utils = import_module("src.utils.cli")

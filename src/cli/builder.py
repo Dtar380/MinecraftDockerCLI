@@ -40,6 +40,7 @@ class Builder(CustomGroup):
             services: dict[str, dicts] = {}
             networks: dict[str, str] = {}
             envs: dict[str, dicts] = {}
+            service_files: dict[str, dicts] = {}
 
             if self.cwd.joinpath("data.json").exists():
                 if not confirm(
@@ -50,10 +51,11 @@ class Builder(CustomGroup):
 
             if not network:
                 menu = Menus()
-                service, env = self.__get_data(menu)
+                service, env, service_file = self.__get_data(menu)
                 name: str = service.get("name")  # type: ignore
                 services[name] = service
                 envs[name] = env
+                service_files[name] = service_file
 
             else:
                 network_name = self.__get_name(
@@ -66,10 +68,11 @@ class Builder(CustomGroup):
                 while True:
                     menu.ports = {}
 
-                    service, env = self.__get_data(menu)
+                    service, env, service_file = self.__get_data(menu)
                     name: str = service.get("name")  # type: ignore
                     services[name] = service
                     envs[name] = env
+                    service_files[name] = service_file
 
                     clear(0.5)
 
@@ -81,6 +84,9 @@ class Builder(CustomGroup):
             services_list = [svc for _, svc in services.items()]
             networks_list = [net for _, net in networks.items()]
             envs_list = [env for _, env in envs.items()]
+            service_files_list = [
+                svc_file for _, svc_file in service_files.items()
+            ]
 
             clear(0)
             self.file_manager.save_files(
@@ -90,6 +96,7 @@ class Builder(CustomGroup):
                         "networks": networks_list,
                     },
                     "envs": envs_list,
+                    "service_files": service_files_list,
                 }
             )
             clear(0)
@@ -130,6 +137,9 @@ class Builder(CustomGroup):
             services_list: list[dicts] = compose.get("services", []) or []
             networks_list: list[str] = compose.get("networks", []) or []
             envs_list: list[dicts] = data.get("envs", []) or []
+            service_files_list: list[dicts] = (
+                data.get("service_files", []) or []
+            )
 
             services: dict[Any, dicts] = {
                 svc.get("name"): svc for svc in services_list
@@ -137,6 +147,10 @@ class Builder(CustomGroup):
             networks: dict[str, str] = {net: net for net in networks_list}
             envs: dict[Any, dicts] = {
                 env.get("CONTAINER_NAME"): env for env in envs_list
+            }
+            service_files: dict[Any, dicts] = {
+                svc_file.get("name"): svc_file
+                for svc_file in service_files_list
             }
 
             if not services:
@@ -172,10 +186,14 @@ class Builder(CustomGroup):
                         for e in envs_list
                         if e.get("CONTAINER_NAME") != target
                     ]
+                    service_files_list = [
+                        f for f in service_files_list if f.get("name") != target
+                    ]
                     compose["services"] = services_list
                     compose["networks"] = networks_list
                     data["compose"] = compose
                     data["envs"] = envs_list
+                    data["service_files"] = service_files_list
                     self.file_manager.save_files(data)
                     print(f"Service '{target}' removed and files updated.")
 
@@ -196,22 +214,27 @@ class Builder(CustomGroup):
                     ).execute()
                 menu = Menus(network=network)
 
-                service_obj, env_obj = self.__get_data(menu, name)
+                service_obj, env_obj, svc_file_obj = self.__get_data(menu, name)
                 service_obj["name"] = name
                 env_obj["CONTAINER_NAME"] = name
 
                 services[name] = service_obj
                 envs[name] = env_obj
+                service_files[name] = svc_file_obj
 
                 if confirm(msg=f"Add/Update service '{name}'"):
                     services_list = [svc for _, svc in services.items()]
                     networks_list = [net for _, net in networks.items()]
                     envs_list = [env for _, env in envs.items()]
+                    service_files_list = [
+                        svc_file for _, svc_file in service_files.items()
+                    ]
 
                     compose["services"] = services_list
                     compose["networks"] = networks_list
                     data["compose"] = compose
                     data["envs"] = envs_list
+                    data["service_files"] = service_files_list
                     self.file_manager.save_files(data)
                     print(f"Service '{name}' removed and files updated.")
 
@@ -259,7 +282,7 @@ class Builder(CustomGroup):
 
     def __get_data(
         self, menu: Menus, name: str | None = None
-    ) -> tuple[dicts, dicts]:
+    ) -> tuple[dicts, dicts, dicts]:
         clear(0.5)
 
         if not name:
@@ -267,8 +290,9 @@ class Builder(CustomGroup):
 
         service = menu.service(name=name)
         env = menu.env(name=name)
+        service_files = menu.service_files(name=name)
 
-        return (service, env)
+        return (service, env, service_files)
 
     def __get_name(self, message: str, network: bool = False) -> str:
         while True:

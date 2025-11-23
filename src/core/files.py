@@ -5,13 +5,13 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from shutil import copyfileobj
 from typing import Any, cast
 
 from importlib_resources import as_file, files  # type: ignore
 import jinja2
-import requests  # type: ignore
 from yaspin import yaspin  # type: ignore
+
+from .downloader import Downloader
 
 #################################################
 # CODE
@@ -45,9 +45,8 @@ class FileManager:
                 composer_tmp, compose, self.cwd.joinpath("docker-compose.yml")
             )
 
-        services: list[dicts] = compose.get("services", []) or []
-        names: list[str] = [service.get("name") for service in services]  # type: ignore
-        self.copy_files(self.cwd, names)
+        service_files: list[dicts] = data.get("service_files", []) or []
+        self.copy_files(self.cwd, service_files)
 
         envs: list[dicts] = data.get("envs") or []
         for env in envs:
@@ -77,7 +76,7 @@ class FileManager:
         return None
 
     @yaspin(text="Copying files...", color="cyan")
-    def copy_files(self, path: Path, services: list[str]) -> None:
+    def copy_files(self, path: Path, service_files: list[dicts]) -> None:
         docker_pkg = files("src.assets.docker")
         dockerfile_res = docker_pkg.joinpath("Dockerfile")
         dockerignore_res = docker_pkg.joinpath(".dockerignore")
@@ -97,8 +96,9 @@ class FileManager:
         eula_bytes = eula_res.read_bytes()
 
         # Write files for each service
-        for service in services:
-            dest_dir = path.joinpath("servers", service)
+        for service_file in service_files:
+            name = str(service_file.get("name"))
+            dest_dir = path.joinpath("servers", name)
             dest_dir.mkdir(parents=True, exist_ok=True)
 
             (dest_dir / "Dockerfile").write_bytes(dockerfile_bytes)
@@ -109,63 +109,20 @@ class FileManager:
             mc_dir.mkdir(parents=True, exist_ok=True)
             (mc_dir / "eula.txt").write_bytes(eula_bytes)
 
-            if "proxy" in service.lower():
-                plugins = mc_dir.joinpath("plugins")
-                plugins.mkdir(exist_ok=True)
-                self.__download_proxy(mc_dir)
+            server = service_file.get("server")
+            if server:
+                jar_file = server.get("jar_file") or None
+                server_type = server.get("type") or None
+                version = server.get("version") or None
+
+                if server_type is None or jar_file is None:
+                    continue
+
+                d = Downloader("https://fill.papermc.io/v3/projects")
+                d.download_latest(server_type, mc_dir, jar_file, version)
 
         # Write top-level README into the given path
         (path / "README.md").write_bytes(readme_bytes)
-
-    def __download_proxy(self, path: Path) -> None:
-        api = "https://fill.papermc.io/v3/projects/velocity"
-
-        ver_resp = requests.get(api)
-        versions = ver_resp.json()
-        if not versions:
-            return
-        try:
-            version = list(versions.get("versions").values())[0][0]
-        except Exception:
-            return
-
-        builds_resp = requests.get(f"{api}/versions/{version}")
-        builds = builds_resp.json()
-        if not builds:
-            return
-        try:
-            build = list(builds.get("builds"))[0]
-        except Exception:
-            return
-
-        final_resp = requests.get(f"{api}/versions/{version}/builds/{build}")
-        final = final_resp.json()
-        if not final:
-            return
-        try:
-            downloads = final.get("downloads")
-            if "server:default" in downloads:
-                download_url = downloads["server:default"].get("url")
-            else:
-                return
-        except Exception:
-            return
-
-        if not download_url:
-            return
-
-        out_path = path.joinpath("proxy.jar")
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        with requests.get(download_url, stream=True) as r:
-            r.raise_for_status()
-            with open(out_path, "wb") as f:
-                copyfileobj(r.raw, f)
-        try:
-            (path / "proxy_ver.txt").write_text(
-                f"velocity-{version}-{build}.jar"
-            )
-        except Exception:
-            return
 
     @yaspin(text="Rendering template...", color="cyan")
     def template_to_file(

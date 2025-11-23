@@ -47,3 +47,13 @@ e2: dicts = {
     "MAX_HEAP_SIZE": "1024M",
     "HOST_PORTS": {"HOST_PORT": 25565},
 }
+
+f1: dicts = {
+    "name": "server1",
+    "server": {"jar_file": "server.jar", "type": "paper", "version": "1.20.1"},
+}
+
+f2: dicts = {
+    "name": "server2",
+    "server": {"jar_file": "server.jar", "type": "paper", "version": "1.20.1"},
+}
