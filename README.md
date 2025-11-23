@@ -115,7 +115,6 @@ Currently resolving issues and developing the unit tests for future updates.
 Already Planned releases
 | VERSION | INCLUDES                                             |
 |---------|------------------------------------------------------|
-| 0.2.0   | Unit Tests implementation                            |
 | 0.3.0   | Extra update functionality to change data.json data  |
 | 0.4.0   | Add Paper, Vanilla, Fabric and Forge direct download |
 | 1.0.0   | First release (refactor and extra docs)              |

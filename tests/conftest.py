@@ -1,14 +1,32 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, Callable, TypeVar
 
-from click.testing import CliRunner
 import pytest  # type: ignore
 
+# Type variable for decorator-preserving callable
+T = TypeVar("T", bound=Callable[..., Any])
 
-@pytest.fixture()
-def runner() -> CliRunner:
-    return CliRunner()
+
+@pytest.fixture(autouse=True)
+def disable_yaspin(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Disable yaspin spinners/colors during tests by replacing the
+    `yaspin.yaspin` decorator with a no-op decorator.
+    """
+    try:
+        import yaspin as _yaspin  # type: ignore
+
+        def _noop_yaspin(*args: Any, **kwargs: Any) -> Callable[[T], T]:
+            def _decorator(func: T) -> T:
+                return func
+
+            return _decorator
+
+        monkeypatch.setattr(_yaspin, "yaspin", _noop_yaspin, raising=False)
+    except Exception:
+        # If yaspin is not available or patching fails, silently continue
+        pass
 
 
 @pytest.fixture()
