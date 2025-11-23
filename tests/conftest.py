@@ -9,26 +9,6 @@ import pytest  # type: ignore
 T = TypeVar("T", bound=Callable[..., Any])
 
 
-@pytest.fixture(autouse=True)
-def disable_yaspin(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Disable yaspin spinners/colors during tests by replacing the
-    `yaspin.yaspin` decorator with a no-op decorator.
-    """
-    try:
-        import yaspin as _yaspin  # type: ignore
-
-        def _noop_yaspin(*args: Any, **kwargs: Any) -> Callable[[T], T]:
-            def _decorator(func: T) -> T:
-                return func
-
-            return _decorator
-
-        monkeypatch.setattr(_yaspin, "yaspin", _noop_yaspin, raising=False)
-    except Exception:
-        # If yaspin is not available or patching fails, silently continue
-        pass
-
-
 @pytest.fixture()
 def isolate_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Redirect CLI file operations to a temporary directory."""
@@ -74,7 +54,27 @@ def isolate_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
-@pytest.fixture()
+@pytest.fixture(autouse=True)
+def disable_yaspin(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Disable yaspin spinners/colors during tests by replacing the
+    `yaspin.yaspin` decorator with a no-op decorator.
+    """
+    try:
+        import yaspin as _yaspin  # type: ignore
+
+        def _noop_yaspin(*args: Any, **kwargs: Any) -> Callable[[T], T]:
+            def _decorator(func: T) -> T:
+                return func
+
+            return _decorator
+
+        monkeypatch.setattr(_yaspin, "yaspin", _noop_yaspin, raising=False)
+    except Exception:
+        # If yaspin is not available or patching fails, silently continue
+        pass
+
+
+@pytest.fixture(autouse=True)
 def no_docker(monkeypatch: pytest.MonkeyPatch) -> None:
     """Prevent ComposeManager from calling docker on import/usage.
 
@@ -86,3 +86,41 @@ def no_docker(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         _docker.ComposeManager, "get_services", lambda self: [], raising=False  # type: ignore
     )
+
+
+@pytest.fixture(autouse=True)
+def no_downloader(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Prevent Downloader from making network requests during tests.
+
+    This replaces the network-related methods on the `Downloader` class
+    with no-op implementations so tests won't attempt HTTP requests.
+    """
+    try:
+        import src.core.downloader as _downloader
+
+        # Return empty dicts for `get` calls
+        monkeypatch.setattr(
+            _downloader.Downloader,
+            "get",
+            lambda self, endpoint, **kwargs: {},  # type: ignore
+            raising=False,
+        )
+
+        # Make download_latest a no-op
+        monkeypatch.setattr(
+            _downloader.Downloader,
+            "download_latest",
+            lambda self, endpoint, path, jar_file, version=None: None,  # type: ignore
+            raising=False,
+        )
+
+        # Patch the name-mangled private download method to be a no-op
+        monkeypatch.setattr(
+            _downloader.Downloader,
+            "_Downloader__download_file",
+            lambda self, endpoint, path: None,  # type: ignore
+            raising=False,
+        )
+    except Exception:
+        # If importing or patching fails, silently continue so tests can run.
+        pass

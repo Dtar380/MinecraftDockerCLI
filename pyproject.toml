@@ -56,6 +56,7 @@ pytest = "^8.4.2"
 pytest-cov = "^7.0.0"
 pytest-modern = "^0.7.4"
 rich = "^14.2.0"
+pytest-socket = "^0.7.0"
 
 [tool.poetry.scripts]
 MinecraftDockerCLI = "src.__main__:main"
@@ -209,6 +210,7 @@ addopts = [
     "--color=yes",
     "--strict-markers",
     "--strict-config",
+    "--disable-socket"
 ]
 markers = [
     "slow: marks tests as slow",
