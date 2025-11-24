@@ -1,6 +1,14 @@
 # CHANGELOG
 All released versions changes will be tracked and documented in this file.
 
+## [0.4](https://github.com/Dtar380/VideoService/releases/tag/0.4.0) - 23th November 2025
+Added functionality to change a service data having default values on prompts
+with the current data as a flag for the update command.
+
+### Changed
+- Builder class
+- Menus class
+
 ## [0.3](https://github.com/Dtar380/VideoService/releases/tag/0.3.1) - 23th November 2025
 Added functionality to download a server.jar using official PaperMC API.
 You can download either folia, paper or velocity servers.

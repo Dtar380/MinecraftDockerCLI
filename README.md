@@ -115,7 +115,6 @@ Currently resolving issues and developing the unit tests for future updates.
 Already Planned releases
 | VERSION | INCLUDES                                             |
 |---------|------------------------------------------------------|
-| 0.4.0   | Extra update functionality to change data.json data  |
 | 0.5.0   | Remake inquirer promts for a more intuitive menu     |
 | 1.0.0   | First release (refactor and extra docs)              |
 
