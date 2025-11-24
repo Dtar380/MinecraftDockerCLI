@@ -132,9 +132,13 @@ def disable_cli_clear_confirm(monkeypatch: pytest.MonkeyPatch) -> None:
         try:
             mod = importlib.import_module(mod_name)
             # no-op clear (some implementations take an arg, some don't)
-            monkeypatch.setattr(mod, "clear", lambda *args, **kwargs: None, raising=False)
+            monkeypatch.setattr(
+                mod, "clear", lambda *args, **kwargs: None, raising=False  # type: ignore
+            )
             # always confirm True by default
-            monkeypatch.setattr(mod, "confirm", lambda *args, **kwargs: True, raising=False)
+            monkeypatch.setattr(
+                mod, "confirm", lambda *args, **kwargs: True, raising=False  # type: ignore
+            )
         except Exception:
             # If a module isn't importable in a given test environment, ignore it.
             pass
