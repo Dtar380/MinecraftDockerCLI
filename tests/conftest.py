@@ -3,11 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Callable, TypeVar
 
+import importlib
 import pytest  # type: ignore
-
-# Type variable for decorator-preserving callable
-T = TypeVar("T", bound=Callable[..., Any])
-
 
 @pytest.fixture()
 def isolate_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
@@ -15,7 +12,6 @@ def isolate_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     # Ensure core classes write into tmp_path instead of real cwd
     # Try to obtain the runtime instances created at import time and
     # patch their underlying classes so existing instances use tmp_path.
-    import importlib
 
     try:
         import src as _src
@@ -53,6 +49,9 @@ def isolate_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         )
     return tmp_path
 
+
+# Type variable for decorator-preserving callable
+T = TypeVar("T", bound=Callable[..., Any])
 
 @pytest.fixture(autouse=True)
 def disable_yaspin(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -124,3 +123,18 @@ def no_downloader(monkeypatch: pytest.MonkeyPatch) -> None:
     except Exception:
         # If importing or patching fails, silently continue so tests can run.
         pass
+
+@pytest.fixture(autouse=True)
+def disable_cli_clear_confirm(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Disable interactive clear/confirm helpers across CLI modules during tests."""
+    modules = ["src.utils.cli", "src.cli.builder", "src.cli.menu"]
+    for mod_name in modules:
+        try:
+            mod = importlib.import_module(mod_name)
+            # no-op clear (some implementations take an arg, some don't)
+            monkeypatch.setattr(mod, "clear", lambda *args, **kwargs: None, raising=False)
+            # always confirm True by default
+            monkeypatch.setattr(mod, "confirm", lambda *args, **kwargs: True, raising=False)
+        except Exception:
+            # If a module isn't importable in a given test environment, ignore it.
+            pass

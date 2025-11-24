@@ -43,11 +43,7 @@ class Builder(CustomGroup):
             service_files: dict[str, dicts] = {}
 
             if self.cwd.joinpath("data.json").exists():
-                if not confirm(
-                    msg="A data.json file was already found, want to continue? ",
-                    default=False,
-                ):
-                    return
+                exit("ERROR: data.json already exists, delete it or use another command.")
 
             if not network:
                 menu = Menus()
@@ -115,12 +111,19 @@ class Builder(CustomGroup):
             Option(["--service"], type=self.service_type, default=None),
             Option(["--add"], is_flag=True, default=False),
             Option(["--remove"], is_flag=True, default=False),
+            Option(["--change"], is_flag=True, default=False),
         ]
 
         def callback(
-            service: str | None = None, add: bool = False, remove: bool = False
+            service: str | None = None,
+            add: bool = False,
+            remove: bool = False,
+            change: bool = False,
         ) -> None:
             clear(0)
+
+            if (add and remove) or (add and change) or (remove and change):
+                exit("ERROR: You can only use one option flag.")
 
             path: Path = self.cwd.joinpath("data.json")
 
@@ -205,24 +208,87 @@ class Builder(CustomGroup):
                     if not confirm(
                         msg=f"Service '{name}' already exists. Overwrite? "
                     ):
-                        exit("ERROR: Add cancelled.")
+                        exit("WARNING: Add cancelled.")
 
                 network = None
                 if networks:
                     network = inquirer.select(  # type: ignore
-                        message="Select a network: ", choices=networks_list
+                        message="Select a network: ",
+                        choices=networks_list,
+                        validate=EmptyInputValidator(),
                     ).execute()
                 menu = Menus(network=network)
 
                 service_obj, env_obj, svc_file_obj = self.__get_data(menu, name)
                 service_obj["name"] = name
                 env_obj["CONTAINER_NAME"] = name
+                svc_file_obj["name"] = name
 
                 services[name] = service_obj
                 envs[name] = env_obj
                 service_files[name] = svc_file_obj
 
-                if confirm(msg=f"Add/Update service '{name}'"):
+                if confirm(msg=f"Add service '{name}'"):
+                    services_list = [svc for _, svc in services.items()]
+                    networks_list = [net for _, net in networks.items()]
+                    envs_list = [env for _, env in envs.items()]
+                    service_files_list = [
+                        svc_file for _, svc_file in service_files.items()
+                    ]
+
+                    compose["services"] = services_list
+                    compose["networks"] = networks_list
+                    data["compose"] = compose
+                    data["envs"] = envs_list
+                    data["service_files"] = service_files_list
+                    self.file_manager.save_files(data)
+                    print(f"Service '{name}' removed and files updated.")
+
+            elif change:
+                name = service
+                names = [svc.get("name") for svc in services_list]
+                if not name:
+                    name = str(
+                        inquirer.select(  # type: ignore
+                            message="Select the service: ",
+                            choices=names,
+                            validate=EmptyInputValidator(),
+                        ).execute()
+                    )
+                idx_svc = find_index_by_name(name)
+                if idx_svc is None:
+                    exit(f"ERROR: Service '{name}' not found.")
+
+                network = None
+                if networks:
+                    network = inquirer.select(  # type: ignore
+                        message="Select a network: ",
+                        choices=networks_list,
+                        validate=EmptyInputValidator(),
+                    ).execute()
+
+                service_obj = services_list[idx_svc]
+                env_obj = envs_list[idx_svc]
+                svc_file_obj = service_files_list[idx_svc]
+
+                defaults = {
+                    "service": service_obj,
+                    "env": env_obj,
+                    "service_files": svc_file_obj,
+                }
+
+                menu = Menus(network=network, defaults=defaults)
+
+                service_obj, env_obj, svc_file_obj = self.__get_data(menu, name)
+                service_obj["name"] = name
+                env_obj["CONTAINER_NAME"] = name
+                svc_file_obj["name"] = name
+
+                services[name] = service_obj
+                envs[name] = env_obj
+                service_files[name] = svc_file_obj
+
+                if confirm(msg=f"Update service '{name}'"):
                     services_list = [svc for _, svc in services.items()]
                     networks_list = [net for _, net in networks.items()]
                     envs_list = [env for _, env in envs.items()]
@@ -239,7 +305,7 @@ class Builder(CustomGroup):
                     print(f"Service '{name}' removed and files updated.")
 
             else:
-                print("Use --add or --remove flag.")
+                print("Use --add, --remove or --change flag.")
                 print("Use --services [service] for faster output.")
                 for s in services:
                     print(f" - {s.get('name')}")

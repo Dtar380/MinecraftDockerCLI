@@ -22,10 +22,14 @@ from ..utils.cli import clear, confirm
 class Menus:
 
     def __init__(
-        self, network: str | None = None, update: bool = False
+        self,
+        network: str | None = None,
+        update: bool = False,
+        defaults: dict[str, Any] | None = None,
     ) -> None:
         self.network = network
         self.update = update
+        self.defaults = defaults
 
         self.cpus: float = psutil.cpu_count(logical=True) or 0
         self.memory: int = (
@@ -80,11 +84,24 @@ class Menus:
         return service
 
     def __get_ports(self) -> None:
+        index = 0
         while True:
             clear(0.5)
 
+            if self.defaults:
+                port_default = int(
+                    self.defaults["service"]["ports"][index].split(":")[0]
+                )
+                name_default = str(
+                    self.defaults["env"]["HOST_PORTS"].keys()[index]
+                )
+            else:
+                port_default = 25565
+                name_default = None
+
             port_name = inquirer.text(  # type: ignore
                 message="Add a name for the port: ",
+                default=name_default,
                 validate=EmptyInputValidator(),
             ).execute()
 
@@ -92,7 +109,7 @@ class Menus:
                 message="Add port number: ",
                 min_allowed=1,
                 max_allowed=2**16 - 1,
-                default=25565,
+                default=port_default,
                 validate=EmptyInputValidator(),
             ).execute()
 
@@ -100,9 +117,12 @@ class Menus:
                 msg=f"Want to add {port_name} assigned to port {port}? "
             ):
                 self.ports[port_name] = port
+                index += 1
 
-                if not confirm(msg="Want to add more ports? ", default=False):
-                    return None
+            if len(self.ports) >= 1 and not confirm(
+                msg="Want to add more ports? ", default=False
+            ):
+                return None
 
     def __expose(self) -> list[str]:
         clear(0.5)
@@ -121,12 +141,27 @@ class Menus:
         while True:
             clear(0.5)
 
+            if self.defaults:
+                resources = self.defaults["service"]["resources"]
+                def_cpus_limit = int(resources["limits"]["cpus"])
+                def_cpus_reservation = int(resources["reservations"]["cpus"])
+                def_memory_limit = int(resources["limits"]["memory"])
+                def_memory_reservation = int(
+                    resources["reservations"]["memory"]
+                )
+            else:
+                def_cpus_limit = 0
+                def_cpus_reservation = 0
+                def_memory_limit = 0
+                def_memory_reservation = 0
+
             cpus_limit: float = float(
                 inquirer.number(  # type: ignore
                     message="Select a limit of CPUs for this service: ",
                     min_allowed=0,
                     max_allowed=self.cpus,
                     float_allowed=True,
+                    default=def_cpus_limit,
                     validate=EmptyInputValidator(),
                 ).execute()
             )
@@ -136,6 +171,7 @@ class Menus:
                     min_allowed=0,
                     max_allowed=cpus_limit,
                     float_allowed=True,
+                    default=def_cpus_reservation,
                     validate=EmptyInputValidator(),
                 ).execute()
             )
@@ -146,6 +182,7 @@ class Menus:
                     min_allowed=0,
                     max_allowed=self.memory,
                     float_allowed=False,
+                    default=def_memory_limit,
                     validate=EmptyInputValidator(),
                 ).execute()
             )
@@ -155,6 +192,7 @@ class Menus:
                     min_allowed=0,
                     max_allowed=memory_limit,
                     float_allowed=False,
+                    default=def_memory_reservation,
                     validate=EmptyInputValidator(),
                 ).execute()
             )
@@ -178,7 +216,10 @@ class Menus:
     # Construct env file contents
     def env(self, name: str) -> dict[str, Any]:
         heaps = self.__get_heaps()
-        self.jar_file = self.__get_jar(name)
+        if self.defaults:
+            self.jar_file = self.defaults["env"]["SERVER_JAR"]
+        else:
+            self.jar_file = self.__get_jar(name)
         args = self.__use_args() or ""
 
         return {
