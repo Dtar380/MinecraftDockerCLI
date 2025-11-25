@@ -103,7 +103,7 @@ class Menus:
             port_name = inquirer.text(  # type: ignore
                 message="Add a name for the port: ",
                 default=name_default,
-                validate=EmptyInputValidator(),
+                validate=EmptyInputValidator()
             ).execute()
 
             port = inquirer.number(  # type: ignore
@@ -111,7 +111,7 @@ class Menus:
                 min_allowed=1,
                 max_allowed=2**16 - 1,
                 default=port_default,
-                validate=EmptyInputValidator(),
+                validate=EmptyInputValidator()
             ).execute()
 
             if confirm(
@@ -165,7 +165,7 @@ class Menus:
                     max_allowed=self.cpus,
                     float_allowed=True,
                     default=def_cpus_limit,
-                    validate=EmptyInputValidator(),
+                    validate=EmptyInputValidator()
                 ).execute()
             )
             cpus_reservation: float = float(
@@ -175,7 +175,7 @@ class Menus:
                     max_allowed=cpus_limit,
                     float_allowed=True,
                     default=def_cpus_reservation,
-                    validate=EmptyInputValidator(),
+                    validate=EmptyInputValidator()
                 ).execute()
             )
 
@@ -186,7 +186,7 @@ class Menus:
                     max_allowed=self.memory,
                     float_allowed=False,
                     default=def_memory_limit,
-                    validate=EmptyInputValidator(),
+                    validate=EmptyInputValidator()
                 ).execute()
             )
             memory_reservation: int = int(
@@ -196,7 +196,7 @@ class Menus:
                     max_allowed=memory_limit,
                     float_allowed=False,
                     default=def_memory_reservation,
-                    validate=EmptyInputValidator(),
+                    validate=EmptyInputValidator()
                 ).execute()
             )
 
@@ -274,7 +274,7 @@ class Menus:
                     max_allowed=self.resources["limits"]["memory"],
                     float_allowed=False,
                     default=self.resources["reservations"]["memory"],
-                    validate=EmptyInputValidator(),
+                    validate=EmptyInputValidator()
                 ).execute()
             )
 
@@ -285,7 +285,7 @@ class Menus:
                     max_allowed=self.resources["limits"]["memory"],
                     float_allowed=False,
                     default=self.resources["limits"]["memory"],
-                    validate=EmptyInputValidator(),
+                    validate=EmptyInputValidator()
                 ).execute()
             )
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from subprocess import PIPE, CalledProcessError, CompletedProcess, run
-from time import strftime
+from time import strftime, sleep
 from typing import Any
 
 from yaspin import yaspin
@@ -54,14 +54,20 @@ class ComposeManager:
 
     @yaspin(text="Stopping Services...", color="cyan")
     def stop(self) -> CompletedProcess[str]:
+        sleep(2)
+
         return self.__run("stop")
 
     @yaspin(text="Starting Services...", color="cyan")
     def start(self) -> CompletedProcess[str]:
+        sleep(2)
+
         return self.__run("start")
 
     @yaspin(text="Removing Container...", color="cyan")
     def down(self, remove_volumes: bool = False) -> CompletedProcess[str]:
+        sleep(2)
+
         args = ["down"]
         if remove_volumes:
             args.append("-v")
@@ -69,6 +75,8 @@ class ComposeManager:
 
     @yaspin(text="Putting Up Container...", color="cyan")
     def up(self, attached: bool = True) -> CompletedProcess[str]:
+        sleep(2)
+
         args = ["up", "--build"]
         if not attached:
             args.extend(["-d"])
@@ -103,6 +111,8 @@ class ComposeManager:
 
     @yaspin(text="Backing Up Container...", color="cyan")
     def back_up(self, cwd: Path = Path.cwd()) -> None:
+        sleep(2)
+        
         backup_path = cwd.joinpath(".backup")
         compose_json = cwd.joinpath("data.json")
 

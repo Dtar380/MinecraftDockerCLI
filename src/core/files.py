@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any, cast
+from time import sleep
 
 from importlib_resources import as_file, files  # type: ignore
 import jinja2
@@ -61,6 +62,8 @@ class FileManager:
 
     @yaspin(text="Reading JSON...", color="cyan")
     def read_json(self, file: Path) -> dict[Any, Any] | None:
+        sleep(2)
+
         try:
             with open(file, "r+") as f:
                 data = dict(json.load(f))
@@ -70,6 +73,8 @@ class FileManager:
 
     @yaspin(text="Writting JSON...", color="cyan")
     def write_json(self, file: Path, data: dict[Any, Any]) -> None:
+        sleep(2)
+
         data_str = json.dumps(data, indent=2)
         with open(file, "w+") as f:
             f.write(data_str)
@@ -77,6 +82,8 @@ class FileManager:
 
     @yaspin(text="Copying files...", color="cyan")
     def copy_files(self, path: Path, service_files: list[dicts]) -> None:
+        sleep(2)
+
         docker_pkg = files("src.assets.docker")
         dockerfile_res = docker_pkg.joinpath("Dockerfile")
         dockerignore_res = docker_pkg.joinpath(".dockerignore")
@@ -128,6 +135,8 @@ class FileManager:
     def template_to_file(
         self, template_path: Path, context: dict[Any, Any], dest_path: Path
     ) -> Path:
+        sleep(2)
+        
         rendered = self.__render_template(template_path, context)
         dest_path.parent.mkdir(parents=True, exist_ok=True)
         dest_path.write_text(rendered, encoding="utf-8")
