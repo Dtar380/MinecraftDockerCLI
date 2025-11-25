@@ -3,11 +3,12 @@
 #################################################
 from __future__ import annotations
 
-from click import Context, Group, group
+from click import Context, Group, group, option
 from click.formatting import HelpFormatter
 
 from .cli.builder import Builder
 from .cli.manager import Manager
+from .utils import cli as cli_utils
 
 
 #################################################
@@ -46,9 +47,30 @@ class TopGroup(Group):
 
 
 # Create the main group for the CLI using custom Group class
+@option(
+    "-v",
+    "--verbose",
+    is_flag=True,
+    default=False,
+    help="Enable verbose output (avoid clears).",
+)
+@option(
+    "-y",
+    "--no-confirm",
+    "no_confirm",
+    is_flag=True,
+    default=False,
+    help="Do not ask for confirmations (assume yes).",
+)
 @group(cls=TopGroup)
-def cli() -> None:
-    pass
+def cli(verbose: bool = False, no_confirm: bool = False) -> None:
+    # Apply global CLI flags to utility helpers
+    try:
+        cli_utils.set_verbose(verbose)
+        cli_utils.set_no_confirm(no_confirm)
+    except Exception:
+        # If utils cannot be imported for some reason, continue silently
+        pass
 
 
 # Add the two command groups
