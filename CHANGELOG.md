@@ -1,6 +1,17 @@
 # CHANGELOG
 All released versions changes will be tracked and documented in this file.
 
+## [0.5](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.5.0) - 25th November 2025
+Changed prompts to be more intuitive and more direct.
+Added --verbose flag to avoid console clears.
+Added --no-confirm flag to avoid asking for user confirmation.
+
+### Changed
+- Builder class
+- Menus class
+- Utils
+- Main
+
 ## [0.4](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.4.0) - 23th November 2025
 Added functionality to change a service data having default values on prompts
 with the current data as a flag for the update command.
