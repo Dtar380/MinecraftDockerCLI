@@ -8,10 +8,11 @@ from pathlib import Path
 import traceback
 from typing import Any
 
-from click import Choice, Command, Group
+from click import Command, Group
 
 from ..core.docker import ComposeManager
 from ..core.files import FileManager
+from .param_types import DETACH_KEYS, SERVICE_TYPE, ServiceType
 
 #################################################
 # CODE
@@ -22,6 +23,10 @@ dicts = dict[str, Any]
 class CustomGroup(Group):
 
     cwd: Path = Path.cwd()
+
+    # class-level param types (can be overridden per-instance)
+    detach_keys_type = DETACH_KEYS
+    service_type: ServiceType = SERVICE_TYPE
 
     def __init__(self) -> None:
         super().__init__()
@@ -51,9 +56,11 @@ class CustomGroup(Group):
                 services = []
 
         if services:
-            self.service_type = Choice([str(s) for s in services])
+            # create an instance bound to the discovered service names
+            self.service_type = ServiceType([str(s) for s in services])
         else:
-            self.service_type = None  # type: ignore
+            # keep the shared empty instance (no choices)
+            self.service_type = SERVICE_TYPE
 
         self.__register_commands()
 

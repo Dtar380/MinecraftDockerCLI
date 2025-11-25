@@ -24,10 +24,17 @@ class Manager(CustomGroup):
 
     def open(self) -> Command:
         help = "Open the terminal of a service."
-        options = [Option(["--service"], type=self.service_type, default=None)]
+        options = [
+            Option(["--service"], type=self.service_type, default=None),
+            Option(
+                ["--detach-keys"],
+                type=self.detach_keys_type,
+                default="ctrl-p,ctrl-q",
+            ),
+        ]
 
-        def callback(service: str) -> None:
-            self.compose_manager.open_terminal(service)
+        def callback(service: str, detach_keys: str) -> None:
+            self.compose_manager.open_terminal(service, detach_keys)
 
         return Command(
             name=inspect.currentframe().f_code.co_name,  # type: ignore

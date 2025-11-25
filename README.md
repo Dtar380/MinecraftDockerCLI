@@ -53,6 +53,10 @@ To use this app you simply need to type `MinecraftDockerCLI` in your terminal fo
 > [!WARNING]
 > To ensure the app runs correctly, make sure the ENV you installed the app to is activated and that you are on the folder of your server project.
 
+### **Universal Options**
+- --no-confirm/-y: Disables confirmations via prompts and sets all confirmations to yes
+- --verbose/-v: Disables all console clears
+
 ### **Builder commands**
 Create:
 - Help: Create all files for the containerization.
