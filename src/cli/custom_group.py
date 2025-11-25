@@ -36,9 +36,7 @@ class CustomGroup(Group):
         if not services:
             try:
                 data: dicts = (
-                    self.file_manager.read_json(
-                        self.cwd.joinpath("data.json"), True
-                    )
+                    self.file_manager.read_json(self.cwd.joinpath("data.json"))
                     or {}
                 )
                 compose: dicts = data.get("compose", {}) or {}

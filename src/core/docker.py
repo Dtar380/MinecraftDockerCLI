@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from subprocess import PIPE, CalledProcessError, CompletedProcess, run
-from time import strftime, sleep
+from time import sleep, strftime
 from typing import Any
 
 from yaspin import yaspin
@@ -23,9 +23,10 @@ class ComposeManager:
 
     cwd = Path.cwd()
 
-    def __init__(self) -> None:
+    def __init__(self, sleep: int = 0) -> None:
         self.composer_file = self.cwd.joinpath("docker-compose.yml")
         self.file_manager = FileManager()
+        self.sleep = sleep
 
     def __run(
         self,
@@ -54,19 +55,19 @@ class ComposeManager:
 
     @yaspin(text="Stopping Services...", color="cyan")
     def stop(self) -> CompletedProcess[str]:
-        sleep(2)
+        sleep(self.sleep)
 
         return self.__run("stop")
 
     @yaspin(text="Starting Services...", color="cyan")
     def start(self) -> CompletedProcess[str]:
-        sleep(2)
+        sleep(self.sleep)
 
         return self.__run("start")
 
     @yaspin(text="Removing Container...", color="cyan")
     def down(self, remove_volumes: bool = False) -> CompletedProcess[str]:
-        sleep(2)
+        sleep(self.sleep)
 
         args = ["down"]
         if remove_volumes:
@@ -75,7 +76,7 @@ class ComposeManager:
 
     @yaspin(text="Putting Up Container...", color="cyan")
     def up(self, attached: bool = True) -> CompletedProcess[str]:
-        sleep(2)
+        sleep(self.sleep)
 
         args = ["up", "--build"]
         if not attached:
@@ -111,8 +112,8 @@ class ComposeManager:
 
     @yaspin(text="Backing Up Container...", color="cyan")
     def back_up(self, cwd: Path = Path.cwd()) -> None:
-        sleep(2)
-        
+        sleep(self.sleep)
+
         backup_path = cwd.joinpath(".backup")
         compose_json = cwd.joinpath("data.json")
 

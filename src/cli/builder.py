@@ -29,6 +29,8 @@ class Builder(CustomGroup):
 
     def __init__(self) -> None:
         super().__init__()
+        self.compose_manager.sleep = 2
+        self.file_manager.sleep = 2
 
     def create(self) -> Command:
         help = "Create all files for the containerization."
@@ -189,7 +191,7 @@ class Builder(CustomGroup):
                     exit(f"ERROR: Service '{target}' not found.")
 
                 clear(0.5)
-                
+
                 if confirm(msg=f"Remove service '{target}'", default=False):
                     services_list.pop(idx)
                     envs_list = [

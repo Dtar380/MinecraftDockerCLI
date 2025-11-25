@@ -6,6 +6,7 @@ from typing import Any, Callable, TypeVar
 import importlib
 import pytest  # type: ignore
 
+
 @pytest.fixture()
 def isolate_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Redirect CLI file operations to a temporary directory."""
@@ -52,6 +53,7 @@ def isolate_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 # Type variable for decorator-preserving callable
 T = TypeVar("T", bound=Callable[..., Any])
+
 
 @pytest.fixture(autouse=True)
 def disable_yaspin(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -124,6 +126,7 @@ def no_downloader(monkeypatch: pytest.MonkeyPatch) -> None:
         # If importing or patching fails, silently continue so tests can run.
         pass
 
+
 @pytest.fixture(autouse=True)
 def disable_cli_clear_confirm(monkeypatch: pytest.MonkeyPatch) -> None:
     """Disable interactive clear/confirm helpers across CLI modules during tests."""
@@ -142,3 +145,51 @@ def disable_cli_clear_confirm(monkeypatch: pytest.MonkeyPatch) -> None:
         except Exception:
             # If a module isn't importable in a given test environment, ignore it.
             pass
+
+
+@pytest.fixture(autouse=True)
+def zero_sleep(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Ensure FileManager and ComposeManager sleep times are zero during tests.
+
+    This prevents test slowdown by forcing both the class defaults and any
+    existing instances (created at import time) to use `sleep = 0`.
+    """
+    try:
+        import importlib
+
+        try:
+            import src as _src
+        except Exception:
+            _src = importlib.import_module("src")
+
+        # Try to find runtime builder instance if present
+        builder_inst = getattr(_src, "builder", None)
+        if builder_inst is None:
+            try:
+                mod = importlib.import_module("src.__main__")
+                builder_inst = getattr(mod, "builder", None)
+            except Exception:
+                builder_inst = None
+
+        import src.core.files as _files
+        import src.core.docker as _docker
+
+        # Patch class-level defaults so future instances are fast
+        monkeypatch.setattr(_files.FileManager, "sleep", 0, raising=False)
+        monkeypatch.setattr(_docker.ComposeManager, "sleep", 0, raising=False)
+
+        # If runtime instances exist, set their attribute as well
+        if builder_inst is not None:
+            if hasattr(builder_inst, "file_manager"):
+                try:
+                    builder_inst.file_manager.sleep = 0
+                except Exception:
+                    pass
+            if hasattr(builder_inst, "compose_manager"):
+                try:
+                    builder_inst.compose_manager.sleep = 0
+                except Exception:
+                    pass
+    except Exception:
+        # Keep tests resilient if any import/patch fails
+        pass

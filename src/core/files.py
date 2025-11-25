@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, cast
 from time import sleep
+from typing import Any, cast
 
 from importlib_resources import as_file, files  # type: ignore
 import jinja2
@@ -26,6 +26,9 @@ class FileManager:
     """
 
     cwd = Path.cwd()
+
+    def __init__(self, sleep: int = 0) -> None:
+        self.sleep = sleep
 
     def save_files(self, data: dicts, build: bool = False) -> None:
         """
@@ -61,10 +64,8 @@ class FileManager:
         self.cwd.joinpath(".backup").mkdir(exist_ok=True)
 
     @yaspin(text="Reading JSON...", color="cyan")
-    def read_json(
-        self, file: Path, start: bool | None = None
-    ) -> dict[Any, Any] | None:
-        if not start: sleep(2)
+    def read_json(self, file: Path) -> dict[Any, Any] | None:
+        sleep(self.sleep)
 
         try:
             with open(file, "r+") as f:
@@ -75,7 +76,7 @@ class FileManager:
 
     @yaspin(text="Writting JSON...", color="cyan")
     def write_json(self, file: Path, data: dict[Any, Any]) -> None:
-        sleep(2)
+        sleep(self.sleep)
 
         data_str = json.dumps(data, indent=2)
         with open(file, "w+") as f:
@@ -84,7 +85,7 @@ class FileManager:
 
     @yaspin(text="Copying files...", color="cyan")
     def copy_files(self, path: Path, service_files: list[dicts]) -> None:
-        sleep(2)
+        sleep(self.sleep)
 
         docker_pkg = files("src.assets.docker")
         dockerfile_res = docker_pkg.joinpath("Dockerfile")
@@ -137,7 +138,7 @@ class FileManager:
     def template_to_file(
         self, template_path: Path, context: dict[Any, Any], dest_path: Path
     ) -> Path:
-        sleep(2)
+        sleep(self.sleep)
 
         rendered = self.__render_template(template_path, context)
         dest_path.parent.mkdir(parents=True, exist_ok=True)

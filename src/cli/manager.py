@@ -19,6 +19,8 @@ class Manager(CustomGroup):
 
     def __init__(self) -> None:
         super().__init__()
+        self.compose_manager.sleep = 2
+        self.file_manager.sleep = 2
 
     def open(self) -> Command:
         help = "Open the terminal of a service."
