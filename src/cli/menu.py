@@ -91,10 +91,10 @@ class Menus:
 
             if self.defaults:
                 port_default = int(
-                    self.defaults["service"]["ports"][index].split(":")[0]
+                    list(self.defaults["env"]["HOST_PORTS"].values())[index]
                 )
                 name_default = str(
-                    self.defaults["env"]["HOST_PORTS"].keys()[index]
+                    list(self.defaults["env"]["HOST_PORTS"].keys())[index]
                 )
             else:
                 port_default: int | None = 25565 if index == 0 else None  # type: ignore
@@ -144,17 +144,19 @@ class Menus:
 
             if self.defaults:
                 resources = self.defaults["service"]["resources"]
-                def_cpus_limit = int(resources["limits"]["cpus"])
-                def_cpus_reservation = int(resources["reservations"]["cpus"])
-                def_memory_limit = int(resources["limits"]["memory"])
-                def_memory_reservation = int(
-                    resources["reservations"]["memory"]
-                )
+                def_cpus_limit = float(resources["limits"]["cpus"])
+                def_cpus_reservation = float(resources["reservations"]["cpus"])
+                def_memory_limit = int(float(
+                    resources["limits"]["memory"].removesuffix("g")
+                ) * 1024)
+                def_memory_reservation = int(float(
+                    resources["reservations"]["memory"].removesuffix("g")
+                ) * 1024)
             else:
-                def_cpus_limit = 0
+                def_cpus_limit = 1
                 def_cpus_reservation = 0
-                def_memory_limit = 0
-                def_memory_reservation = 0
+                def_memory_limit = 1024
+                def_memory_reservation = 256
 
             cpus_limit: float = float(
                 inquirer.number(  # type: ignore
@@ -251,7 +253,10 @@ class Menus:
     def __use_args(self) -> str | None:
         clear(0.5)
 
-        if confirm(msg="Want to use recommended args for the server? "):
+        if confirm(
+            msg="Want to use recommended args for the server? ",
+            default=False if "proxy" in self.name else True
+        ):
             txt_file = Path(files("src.assets.config").joinpath("recommended-args.txt"))  # type: ignore
             with open(txt_file, "r+") as f:  # type: ignore
                 data = f.readlines()

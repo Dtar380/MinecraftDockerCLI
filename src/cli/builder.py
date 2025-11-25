@@ -188,6 +188,8 @@ class Builder(CustomGroup):
                 if idx is None:
                     exit(f"ERROR: Service '{target}' not found.")
 
+                clear(0.5)
+                
                 if confirm(msg=f"Remove service '{target}'", default=False):
                     services_list.pop(idx)
                     envs_list = [
@@ -233,6 +235,8 @@ class Builder(CustomGroup):
                 services[name] = service_obj
                 envs[name] = env_obj
                 service_files[name] = svc_file_obj
+
+                clear(0.5)
 
                 if confirm(msg=f"Add service '{name}'"):
                     services_list = [svc for _, svc in services.items()]
@@ -293,6 +297,8 @@ class Builder(CustomGroup):
                 services[name] = service_obj
                 envs[name] = env_obj
                 service_files[name] = svc_file_obj
+
+                clear(0.5)
 
                 if confirm(msg=f"Update service '{name}'"):
                     services_list = [svc for _, svc in services.items()]
