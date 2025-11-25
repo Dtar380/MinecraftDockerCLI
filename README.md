@@ -68,9 +68,13 @@ Update:
 - Help: Update the contents of the containers.
 - Description: This command will either delete a service or add a service with the same method as Create.
 - Arguments:
-    - --add: Flag to state the addition of a service.
-    - --remove: Flag to state the removal of a service.
+    - --add: Flag to state the addition of a new service.
+    - --remove: Flag to state the removal of an existing service.
+    - --change: Flag to state the change of an existing service.
     - --service: Parameter to specify the name of the service.
+
+> [!NOTE]
+> For an update to take place containers must be restarted
 
 Build:
 - Help: Build the files for the containerization.
@@ -87,7 +91,8 @@ Backup:
 Up:
 - Help: Build the containers and start them. (This will overwrite the data inside with the host data)
 - Arguments:
-    - --atached: Flag to run the containers in atached mode.
+    - --attached: Flag to run the containers in attached mode.
+    - --detach-keys: Combination of keys to detach from the container terminal
 
 Down:
 - Help: Stop the containers and delete them.
@@ -99,14 +104,18 @@ Down:
 
 Start:
 - Help: Start the containers.
-- Description: This command will
 
 Stop:
 - Help: Stop the containers.
-- Description: This command will
 
 Open:
--
+- Help: Open the terminal of a service.
+- Arguments:
+    - --service: Name of the service who's container terminal will be opened
+    - --detach-keys: Combination of keys to detach from the container terminal
+
+> [!WARNING]
+> If you attach to a container terminal and detach with `ctrl+c` this will stop the container.
 
 ## **Tips & Troubleshooting**
 - Ensure Docker Desktop is running and you can run `docker ps` without errors before invoking the CLI.

@@ -33,7 +33,7 @@ class Manager(CustomGroup):
             ),
         ]
 
-        def callback(service: str, detach_keys: str) -> None:
+        def callback(service: str, detach_keys: str = "ctrl-p,ctrl-q") -> None:
             self.compose_manager.open_terminal(service, detach_keys)
 
         return Command(
@@ -60,10 +60,17 @@ class Manager(CustomGroup):
 
     def up(self) -> Command:
         help = "Start up the containers after changes."
-        options = [Option(["--attached"], is_flag=True, default=False)]
+        options = [
+            Option(["--attached"], is_flag=True, default=False),
+            Option(
+                ["--detach-keys"],
+                type=self.detach_keys_type,
+                default="ctrl-p,ctrl-q",
+            ),
+        ]
 
-        def callback(attached: bool = False) -> None:
-            self.compose_manager.up(attached)
+        def callback(attached: bool = False, detach_keys: str = "ctrl-p,ctrl-q") -> None:
+            self.compose_manager.up(attached, detach_keys)
 
         return Command(
             name=inspect.currentframe().f_code.co_name,  # type: ignore

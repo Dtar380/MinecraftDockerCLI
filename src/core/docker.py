@@ -75,12 +75,15 @@ class ComposeManager:
         return self.__run(*args)
 
     @yaspin(text="Putting Up Container...", color="cyan")
-    def up(self, attached: bool = True) -> CompletedProcess[str]:
+    def up(self, attached: bool = True, detach_keys: str = "ctrl-p,ctrl-q") -> CompletedProcess[str]:
         sleep(self.sleep)
 
         args = ["up", "--build"]
         if not attached:
-            args.extend(["-d"])
+            args.append("-d")
+        else:
+            args.extend(["--detach-keys", detach_keys])
+            print(f"Use '{detach_keys}' to detach (press sequentially).\n")
         return self.__run(*args)
 
     def open_terminal(
