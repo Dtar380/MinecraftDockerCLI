@@ -32,8 +32,8 @@ class Test_CLI:
             assert result.exit_code == 0
 
     # BUILDER
-    def test_create_errors(
-        self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch     
+    def test_create_errors(  # type: ignore
+        self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         base = isolate_cwd
 
@@ -49,7 +49,7 @@ class Test_CLI:
         result = self.runner.invoke(self.cli, ["create"])
         assert result.exit_code != 0
 
-    def test_create(
+    def test_create(  # type: ignore
         self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         service = s1
@@ -106,7 +106,7 @@ class Test_CLI:
         assert (base / "servers" / name / "run.sh").exists()
         assert (base / "servers" / name / "data" / "eula.txt").exists()
 
-    def test_create_network(
+    def test_create_network(  # type: ignore
         self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         from src.cli.builder import Builder
@@ -117,18 +117,16 @@ class Test_CLI:
             self: Any, menu: Any, name: str | None = None
         ) -> tuple[dicts, dicts, dicts]:
             try:
-                return seq.pop(0)
+                current = seq.pop(0)
             except IndexError:
-                return (s2, e2, f2)
+                current = (s2, e2, f2)
+            setattr(menu, "name", current[0].get("name"))  # type: ignore
+            return current
 
         monkeypatch.setattr(Builder, "_Builder__get_data", get_data)
-        monkeypatch.setattr(
-            Builder,
-            "_Builder__get_name",
-            lambda self, message, network=False: "network",  # type: ignore
-        )
 
         confirms = [True, True, False]
+
         def fake_confirm(msg: str, default: bool = True) -> bool:
             try:
                 return confirms.pop(0)
@@ -140,7 +138,9 @@ class Test_CLI:
             mod = import_module(mod_name)
             monkeypatch.setattr(mod, "confirm", fake_confirm)
 
-        result = self.runner.invoke(self.cli, ["create", "--network"])
+        result = self.runner.invoke(
+            self.cli, ["create", "--network", "network"]
+        )
         assert result.exit_code == 0
 
         base = isolate_cwd
@@ -243,7 +243,7 @@ class Test_CLI:
         assert result.exit_code != 0
         assert "Use --add, --remove or --change flag." in result.output
 
-    def test_update_remove(
+    def test_update_remove(  # type: ignore
         self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         base = isolate_cwd
@@ -273,7 +273,7 @@ class Test_CLI:
         assert all(e.get("CONTAINER_NAME") != "server1" for e in envs_after)
         assert all(f.get("name") != "server1" for f in service_files_after)
 
-    def test_update_add(
+    def test_update_add(  # type: ignore
         self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         base = isolate_cwd
@@ -316,7 +316,7 @@ class Test_CLI:
         service_files_names = [f.get("name") for f in service_files_after]
         assert "new" in service_files_names
 
-    def test_update_change(
+    def test_update_change(  # type: ignore
         self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         base = isolate_cwd
@@ -342,7 +342,7 @@ class Test_CLI:
         monkeypatch.setattr(
             Builder,
             "_Builder__get_data",
-            lambda self, menu, name=None: (changed_service, changed_env, changed_svc_files)  # type: ignore
+            lambda self, menu, name=None: (changed_service, changed_env, changed_svc_files),  # type: ignore
         )
 
         result = self.runner.invoke(

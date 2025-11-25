@@ -49,6 +49,7 @@ mypy = "^1.18.2"
 isort = "^7.0.0"
 pre-commit = "^4.3.0"
 flake8 = "^7.3.0"
+flake8-pyproject = "^1.2.3"
 poethepoet = "^0.37.0"
 
 [tool.poetry.group.test.dependencies]
@@ -199,6 +200,23 @@ module = [
     "pydantic.*"
 ]
 ignore_missing_imports = true
+
+[tool.flake8]
+max-line-length = 80
+extend-ignore = ["E203","E501","E701","E266","F403","F405","B008","F401", "B010"]
+exclude = [
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".tox",
+    ".venv",
+    ".pytest_cache",
+    "build",
+    "dist",
+    "migrations",
+    "__pycache__"
+]
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::UserWarning"]

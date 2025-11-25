@@ -58,7 +58,7 @@ Create:
 - Help: Create all files for the containerization.
 - Description: This command will ask the user with prompts everything to build a docker-compose.yml and .envs for all the services the user will run. Running this command on a existing project will overwrite the files.
 - Arguments:
-    - --network: Flag for creating network insteat of single server (required)
+    - --network: Parameter to specify the name of the network of the docker containers (required)
 
 Update:
 - Help: Update the contents of the containers.

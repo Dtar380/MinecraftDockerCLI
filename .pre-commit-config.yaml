@@ -19,8 +19,7 @@ repos:
     rev: 7.2.0
     hooks:
       - id: flake8
-        additional_dependencies: [flake8-bugbear]
-        args: ["--config=.flake8"]
+        additional_dependencies: [flake8-bugbear, flake8-pyproject]
 
   # mypy - verificación de tipos
   - repo: https://github.com/pre-commit/mirrors-mypy

@@ -44,9 +44,10 @@ class Menus:
         clear(1)
 
         self.jar_file: str | None
+        self.name: str = ""
 
     # Construct service contents for docker-compose
-    def service(self, name: str) -> dict[str, Any]:
+    def service(self) -> dict[str, Any]:
         self.__get_ports()
         expose = self.__expose()
         ports = [
@@ -66,10 +67,10 @@ class Menus:
         )
 
         service: dict[str, Any] = {
-            "name": name,
-            "build": {"context": f"./servers/{name}/"},
-            "env_file": f"./servers/{name}/.env",
-            "working_dir": f"/{name}",
+            "name": self.name,
+            "build": {"context": f"./servers/{self.name}/"},
+            "env_file": f"./servers/{self.name}/.env",
+            "working_dir": f"/{self.name}",
         }
 
         if ports:
@@ -96,8 +97,8 @@ class Menus:
                     self.defaults["env"]["HOST_PORTS"].keys()[index]
                 )
             else:
-                port_default = 25565
-                name_default = None
+                port_default: int | None = 25565 if index == 0 else None  # type: ignore
+                name_default: str | None = "HOST" if index == 0 else None  # type: ignore
 
             port_name = inquirer.text(  # type: ignore
                 message="Add a name for the port: ",
@@ -119,7 +120,7 @@ class Menus:
                 self.ports[port_name] = port
                 index += 1
 
-            if len(self.ports) >= 1 and not confirm(
+            if index >= 1 and not confirm(
                 msg="Want to add more ports? ", default=False
             ):
                 return None
@@ -129,9 +130,9 @@ class Menus:
 
         expose: list[str] = []
         for name, port in self.ports.items():
-
             if confirm(
-                msg=f"Want to expose {name} assigned to {port}? ", default=False
+                msg=f"Want to expose {name} assigned to {port}? ",
+                default=False if "proxy" in self.name else True,
             ):
                 expose.append(name)
 
@@ -214,16 +215,16 @@ class Menus:
         }
 
     # Construct env file contents
-    def env(self, name: str) -> dict[str, Any]:
+    def env(self) -> dict[str, Any]:
         heaps = self.__get_heaps()
         if self.defaults:
             self.jar_file = self.defaults["env"]["SERVER_JAR"]
         else:
-            self.jar_file = self.__get_jar(name)
+            self.jar_file = self.__get_jar()
         args = self.__use_args() or ""
 
         return {
-            "CONTAINER_NAME": name,
+            "CONTAINER_NAME": self.name,
             "SERVER_JAR": self.jar_file,
             "JAVA_ARGS": args,
             "MIN_HEAP_SIZE": heaps[0],
@@ -231,11 +232,11 @@ class Menus:
             "HOST_PORTS": self.ports,
         }
 
-    def __get_jar(self, name: str) -> str:
+    def __get_jar(self) -> str:
         while True:
             clear(0.5)
 
-            default = "proxy" if "proxy" in name.lower() else "server"
+            default = "proxy" if "proxy" in self.name.lower() else "server"
             jar: str = inquirer.text(  # type: ignore
                 message="Enter your .jar file name: ",
                 default=f"{default}.jar",
@@ -288,11 +289,11 @@ class Menus:
 
         return [f"{min_heap_size}M", f"{max_heap_size}M"]
 
-    def service_files(self, name: str) -> dict[str, Any]:
-        type = self.__get_server_type(name)
+    def service_files(self) -> dict[str, Any]:
+        type = self.__get_server_type()
 
         files: dict[str, Any] = {
-            "name": name,
+            "name": self.name,
             "server": {
                 "jar_file": self.jar_file,
                 "type": type,
@@ -302,9 +303,11 @@ class Menus:
 
         return files
 
-    def __get_server_type(self, name: str) -> str:
+    def __get_server_type(self) -> str:
         choices = (
-            ["folia", "paper"] if "proxy" not in name.lower() else ["velocity"]
+            ["folia", "paper"]
+            if "proxy" not in self.name.lower()
+            else ["velocity"]
         )
         return inquirer.select(  # type: ignore
             message="Choose server type: ",

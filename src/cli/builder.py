@@ -32,9 +32,9 @@ class Builder(CustomGroup):
 
     def create(self) -> Command:
         help = "Create all files for the containerization."
-        options = [Option(["--network"], is_flag=True, default=False)]
+        options = [Option(["--network"], type=str, default=None)]
 
-        def callback(network: bool = False) -> None:
+        def callback(network: str | None = None) -> None:
             clear(0)
 
             services: dict[str, dicts] = {}
@@ -43,39 +43,45 @@ class Builder(CustomGroup):
             service_files: dict[str, dicts] = {}
 
             if self.cwd.joinpath("data.json").exists():
-                exit("ERROR: data.json already exists, delete it or use another command.")
+                exit(
+                    "ERROR: data.json already exists, delete it or use another command."
+                )
 
             if not network:
                 menu = Menus()
                 service, env, service_file = self.__get_data(menu)
-                name: str = service.get("name")  # type: ignore
+                name: str = menu.name  # type: ignore
                 services[name] = service
                 envs[name] = env
                 service_files[name] = service_file
 
             else:
-                network_name = self.__get_name(
-                    message="Enter the name of the network: ", network=True
-                )
-                networks[network_name] = network_name
+                networks[network] = network
 
-                menu = Menus(network=network_name)
+                menu = Menus(network=network)
 
+                idx = 0
                 while True:
                     menu.ports = {}
 
-                    service, env, service_file = self.__get_data(menu)
-                    name: str = service.get("name")  # type: ignore
+                    if idx == 0:
+                        print("Creating proxy service...")
+                    service, env, service_file = self.__get_data(
+                        menu, name="proxy" if idx == 0 else None
+                    )
+                    name: str = menu.name  # type: ignore
                     services[name] = service
                     envs[name] = env
                     service_files[name] = service_file
 
                     clear(0.5)
 
-                    if not confirm(
+                    if idx >= 1 and not confirm(
                         msg=f"Want to continue adding services? (Count: {len(services)})"
                     ):
                         break
+
+                    idx += 1
 
             services_list = [svc for _, svc in services.items()]
             networks_list = [net for _, net in networks.items()]
@@ -349,18 +355,18 @@ class Builder(CustomGroup):
     def __get_data(
         self, menu: Menus, name: str | None = None
     ) -> tuple[dicts, dicts, dicts]:
-        clear(0.5)
-
         if not name:
             name = self.__get_name(message="Enter the name of the service: ")
 
-        service = menu.service(name=name)
-        env = menu.env(name=name)
-        service_files = menu.service_files(name=name)
+        menu.name = name
+
+        service = menu.service()
+        env = menu.env()
+        service_files = menu.service_files()
 
         return (service, env, service_files)
 
-    def __get_name(self, message: str, network: bool = False) -> str:
+    def __get_name(self, message: str) -> str:
         while True:
             clear(0.5)
             name: str = inquirer.text(  # type: ignore
@@ -368,7 +374,7 @@ class Builder(CustomGroup):
             ).execute()
 
             if confirm(
-                msg=f"Want to name this {"network" if network else "service"} '{name}'? ",
+                msg=f"Want to name this service '{name}'? ",
                 default=True,
             ):
                 break
