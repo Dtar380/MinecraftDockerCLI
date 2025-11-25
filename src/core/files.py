@@ -61,8 +61,10 @@ class FileManager:
         self.cwd.joinpath(".backup").mkdir(exist_ok=True)
 
     @yaspin(text="Reading JSON...", color="cyan")
-    def read_json(self, file: Path) -> dict[Any, Any] | None:
-        sleep(2)
+    def read_json(
+        self, file: Path, start: bool | None = None
+    ) -> dict[Any, Any] | None:
+        if not start: sleep(2)
 
         try:
             with open(file, "r+") as f:
@@ -136,7 +138,7 @@ class FileManager:
         self, template_path: Path, context: dict[Any, Any], dest_path: Path
     ) -> Path:
         sleep(2)
-        
+
         rendered = self.__render_template(template_path, context)
         dest_path.parent.mkdir(parents=True, exist_ok=True)
         dest_path.write_text(rendered, encoding="utf-8")
