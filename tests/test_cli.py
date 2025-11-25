@@ -28,6 +28,7 @@ class Test_CLI:
         assert "Manager" in result.stdout
         commands = self.cli.list_commands(Context(self.cli))
         for command in commands:
+            print(command)
             result = self.runner.invoke(self.cli, [command, "--help"])
             assert result.exit_code == 0
 

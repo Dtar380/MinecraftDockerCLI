@@ -34,7 +34,7 @@ class DetachKeysType(ParamType):
         " e.g. 'ctrl-p' or 'ctrl-p,ctrl-q'."
     )
 
-    def get_metavar(self, param: Any) -> str:  # type: ignore[override]
+    def get_metavar(self, param: Any, ctx: Any = None) -> str:
         """Return a short metavar for use in option help text."""
         return "KEY-KEY[,KEY-KEY]"
 
@@ -79,7 +79,7 @@ class ServiceType(ParamType):
     # Generic help message; can be enriched with available choices at runtime
     help = "Service name. If available, valid choices will be listed in the help message."
 
-    def get_metavar(self, param: Any) -> str:  # type: ignore[override]
+    def get_metavar(self, param: Any, ctx: Any = None) -> str:
         return "SERVICE"
 
     def __init__(self, choices: list[str] | None = None) -> None:
