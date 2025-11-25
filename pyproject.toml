@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MinecraftDockerCLI"
-version = "0.5.1"
+version = "0.5.2"
 description = "CLI tool to enhance and simplify containerization of Minecraft servers"
 readme = "README.md"
 license = "MIT"
