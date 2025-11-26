@@ -54,7 +54,7 @@ services:
       POSTGRES_PASSWORD: {{ database.password }}
       POSTGRES_DB: {{ database.db }}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     ports:
       - "5432:5432"
 {% endif %}
@@ -78,4 +78,9 @@ services:
     depends_on:
       - db
 {% endif %}
+{% endif %}
+
+{% if database %}
+volumes:
+  postgres_data:
 {% endif %}

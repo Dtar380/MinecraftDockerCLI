@@ -169,6 +169,10 @@ class FileManager:
         (backend_dir / "Dockerfile").write_bytes(backend_dockerfile_bytes)
         (backend_dir / ".dockerignore").write_bytes(backend_dockerignore_bytes)
 
+        requirements = backend_dir.joinpath("requirements.txt")
+        if not requirements.exists():
+            requirements.write_text("")
+
     @yaspin(text="Rendering template...", color="cyan")
     def template_to_file(
         self, template_path: Path, context: dict[Any, Any], dest_path: Path

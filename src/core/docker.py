@@ -123,7 +123,7 @@ class ComposeManager:
 
         for svc_name in names:
             tar_file = backup_path.joinpath(
-                f"{svc_name}_{strftime('%d-%m-%Y_%H:%M:%S')}.tar.gz"
+                f"{svc_name}_{strftime('%d-%m-%Y_%H-%M-%S')}.tar.gz"
             )
 
             path_inside = "/server"
@@ -157,7 +157,7 @@ class ComposeManager:
             db_user: str = database.get("user", "")
             db_name: str = database.get("db", "")
             db_backup_file = backup_path.joinpath(
-                f"database_{strftime('%d-%m-%Y_%H:%M:%S')}.sql"
+                f"database_{strftime('%d-%m-%Y_%H-%M-%S')}.sql"
             )
             try:
                 with open(db_backup_file, "wb") as f:
@@ -166,7 +166,7 @@ class ComposeManager:
                             "docker",
                             "exec",
                             "-t",
-                            "database",
+                            "postgres_db",
                             "pg_dump",
                             "-U", db_user,
                             "-F", "c",
