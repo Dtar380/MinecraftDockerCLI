@@ -1,6 +1,16 @@
 # CHANGELOG
 All released versions changes will be tracked and documented in this file.
 
+## [0.6](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.6.0) - 25th November 2025
+Added support for web server (python backend, nodejs frontend) and PostgreSQL server.
+
+### Changed
+- Builder class
+- Manager class
+- Menus class
+- ComposeManager class
+- FileManager class
+
 ## [0.5](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.5.2) - 25th November 2025
 Changed prompts to be more intuitive and more direct.
 Added --verbose flag to avoid console clears.
