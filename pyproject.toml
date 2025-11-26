@@ -59,6 +59,11 @@ pytest-modern = "^0.7.4"
 rich = "^14.2.0"
 pytest-socket = "^0.7.0"
 
+[tool.poetry.group.docs.dependencies]
+sphinx = "^8.2.3"
+furo = "^2025.9.25"
+myst-parser = "^4.0.1"
+
 [tool.poetry.scripts]
 MinecraftDockerCLI = "src.__main__:main"
 
