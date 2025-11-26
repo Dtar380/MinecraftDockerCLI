@@ -123,7 +123,7 @@ class Test_CLI:
 
         monkeypatch.setattr(Builder, "_Builder__get_data", get_data)
 
-        confirms = [True, True, False]
+        confirms = [True, True, False, False, False]
 
         def fake_confirm(msg: str, default: bool = True) -> bool:
             try:

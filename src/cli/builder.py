@@ -75,24 +75,17 @@ class Builder(CustomGroup):
 
                     clear(0.5)
 
-                    if idx >= 1 and not inquirer.confirm(  # type: ignore
-                        message=f"Want to continue adding servers? (Count: {len(servers)})",
-                        default=True
-                    ).execute():
+                    if idx >= 1 and not confirm(  # type: ignore
+                        msg=f"Want to continue adding servers? (Count: {len(servers)})",
+                    ):
                         break
 
                     idx += 1
 
-                if inquirer.confirm(  # type: ignore
-                    message=f"Want to use a sql database?",
-                    default=True
-                ).execute():
+                if confirm(msg=f"Want to use a sql database?"):
                     database = menu.database()
 
-                if inquirer.confirm(  # type: ignore
-                    message=f"Want to add a web server?",
-                    default=True
-                ).execute():
+                if confirm(msg=f"Want to add a web server?"):
                     web = True
 
             servers_list = [svc for _, svc in servers.items()]
