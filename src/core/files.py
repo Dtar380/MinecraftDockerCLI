@@ -49,8 +49,8 @@ class FileManager:
                 composer_tmp, compose, self.cwd.joinpath("docker-compose.yml")
             )
 
-        service_files: list[dicts] = data.get("service_files", []) or []
-        self.copy_files(self.cwd, service_files)
+        server_files: list[dicts] = data.get("server_files", []) or []
+        self.copy_files(self.cwd, server_files)
 
         envs: list[dicts] = data.get("envs") or []
         for env in envs:
@@ -84,12 +84,12 @@ class FileManager:
         return None
 
     @yaspin(text="Copying files...", color="cyan")
-    def copy_files(self, path: Path, service_files: list[dicts]) -> None:
+    def copy_files(self, path: Path, server_files: list[dicts]) -> None:
         sleep(self.sleep)
 
         docker_pkg = files("src.assets.docker")
-        dockerfile_res = docker_pkg.joinpath("Dockerfile")
-        dockerignore_res = docker_pkg.joinpath(".dockerignore")
+        dockerfile_res = docker_pkg.joinpath("minecraft.Dockerfile")
+        dockerignore_res = docker_pkg.joinpath("minecraft.dockerignore")
         runsh_res = files("src.assets.scripts").joinpath("run.sh")
         readme_res = files("src.assets").joinpath("README.md")
         eula_res = files("src.assets.config").joinpath("eula.txt")
@@ -105,9 +105,9 @@ class FileManager:
         readme_bytes = readme_res.read_bytes()
         eula_bytes = eula_res.read_bytes()
 
-        # Write files for each service
-        for service_file in service_files:
-            name = str(service_file.get("name"))
+        # Write files for each server
+        for server_file in server_files:
+            name = str(server_file.get("name"))
             dest_dir = path.joinpath("servers", name)
             dest_dir.mkdir(parents=True, exist_ok=True)
 
@@ -119,7 +119,7 @@ class FileManager:
             mc_dir.mkdir(parents=True, exist_ok=True)
             (mc_dir / "eula.txt").write_bytes(eula_bytes)
 
-            server = service_file.get("server")
+            server = server_file.get("server")
             if server:
                 jar_file = server.get("jar_file") or None
                 server_type = server.get("type") or None

@@ -23,11 +23,9 @@ class Menus:
 
     def __init__(
         self,
-        network: str | None = None,
         update: bool = False,
         defaults: dict[str, Any] | None = None,
     ) -> None:
-        self.network = network
         self.update = update
         self.defaults = defaults
 
@@ -46,8 +44,8 @@ class Menus:
         self.jar_file: str | None
         self.name: str = ""
 
-    # Construct service contents for docker-compose
-    def service(self) -> dict[str, Any]:
+    # Construct server contents for docker-compose
+    def server(self) -> dict[str, Any]:
         self.__get_ports()
         expose = self.__expose()
         ports = [
@@ -66,7 +64,7 @@ class Menus:
             str(resources["reservations"]["memory"] / 1024) + "g"
         )
 
-        service: dict[str, Any] = {
+        server: dict[str, Any] = {
             "name": self.name,
             "build": {"context": f"./servers/{self.name}/"},
             "env_file": f"./servers/{self.name}/.env",
@@ -74,15 +72,13 @@ class Menus:
         }
 
         if ports:
-            service["ports"] = ports
+            server["ports"] = ports
         if expose:
-            service["expose"] = exposed
-        if self.network:
-            service["networks"] = [self.network]
+            server["expose"] = exposed
         if resources:
-            service["resources"] = resources
+            server["resources"] = resources
 
-        return service
+        return server
 
     def __get_ports(self) -> None:
         index = 0
@@ -143,7 +139,7 @@ class Menus:
             clear(0.5)
 
             if self.defaults:
-                resources = self.defaults["service"]["resources"]
+                resources = self.defaults["server"]["resources"]
                 def_cpus_limit = float(resources["limits"]["cpus"])
                 def_cpus_reservation = float(resources["reservations"]["cpus"])
                 def_memory_limit = int(float(
@@ -160,7 +156,7 @@ class Menus:
 
             cpus_limit: float = float(
                 inquirer.number(  # type: ignore
-                    message="Select a limit of CPUs for this service: ",
+                    message="Select a limit of CPUs for this server: ",
                     min_allowed=0,
                     max_allowed=self.cpus,
                     float_allowed=True,
@@ -170,7 +166,7 @@ class Menus:
             )
             cpus_reservation: float = float(
                 inquirer.number(  # type: ignore
-                    message="Select a CPUs allocation for this service: ",
+                    message="Select a CPUs allocation for this server: ",
                     min_allowed=0,
                     max_allowed=cpus_limit,
                     float_allowed=True,
@@ -181,7 +177,7 @@ class Menus:
 
             memory_limit: int = int(
                 inquirer.number(  # type: ignore
-                    message="Select a limit of RAM for this service (in MB): ",
+                    message="Select a limit of RAM for this server (in MB): ",
                     min_allowed=0,
                     max_allowed=self.memory,
                     float_allowed=False,
@@ -191,7 +187,7 @@ class Menus:
             )
             memory_reservation: int = int(
                 inquirer.number(  # type: ignore
-                    message="Select a RAM allocation for this service (in MB): ",
+                    message="Select a RAM allocation for this server (in MB): ",
                     min_allowed=0,
                     max_allowed=memory_limit,
                     float_allowed=False,
@@ -201,7 +197,7 @@ class Menus:
             )
 
             if confirm(
-                msg="Confirm the RAM and CPU allocation for this service."
+                msg="Confirm the RAM and CPU allocation for this server."
             ):
                 break
 
@@ -294,7 +290,7 @@ class Menus:
 
         return [f"{min_heap_size}M", f"{max_heap_size}M"]
 
-    def service_files(self) -> dict[str, Any]:
+    def server_files(self) -> dict[str, Any]:
         type = self.__get_server_type()
 
         files: dict[str, Any] = {

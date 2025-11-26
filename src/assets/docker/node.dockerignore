@@ -1,0 +1,28 @@
+# Node modules (no deben copiarse)
+node_modules/
+
+# Archivos de build de Vite
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Archivos de entorno locales
+.env
+.env.*
+!.env.example   # Permite ejemplo si lo tienes
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db

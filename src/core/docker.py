@@ -42,24 +42,13 @@ class ComposeManager:
             print("Command run: ", result.stdout)
         return result
 
-    def get_services(self) -> list[str]:
-        result = self.__run(
-            "config", "--services", capture_output=True, print_output=False
-        )
-        if result.returncode != 0:
-            return []
-        services = [
-            line.strip() for line in result.stdout.splitlines() if line.strip()
-        ]
-        return services
-
-    @yaspin(text="Stopping Services...", color="cyan")
+    @yaspin(text="Stopping servers...", color="cyan")
     def stop(self) -> CompletedProcess[str]:
         sleep(self.sleep)
 
         return self.__run("stop")
 
-    @yaspin(text="Starting Services...", color="cyan")
+    @yaspin(text="Starting servers...", color="cyan")
     def start(self) -> CompletedProcess[str]:
         sleep(self.sleep)
 
@@ -87,12 +76,12 @@ class ComposeManager:
         return self.__run(*args)
 
     def open_terminal(
-        self, service: str, detach_keys: str = "ctrl-p,ctrl-q"
+        self, server: str, detach_keys: str = "ctrl-p,ctrl-q"
     ) -> None:
         try:
             print(f"Use '{detach_keys}' to detach (press sequentially).\n")
             run(
-                ["docker", "attach", "--detach-keys", detach_keys, service],
+                ["docker", "attach", "--detach-keys", detach_keys, server],
                 check=True,
             )
             return
@@ -102,7 +91,7 @@ class ComposeManager:
             pass
 
         for shell in ("/bin/bash", "/bin/sh"):
-            cmd = ["docker", "exec", "-it", service, shell]
+            cmd = ["docker", "exec", "-it", server, shell]
             try:
                 run(cmd, check=True)
                 return
@@ -124,9 +113,9 @@ class ComposeManager:
         data: dict[str, Any] = self.file_manager.read_json(compose_json) or {}
         if not data:
             exit("ERROR: data.json is empty")
-        services = data.get("compose", {}).get("services", []) or []  # type: ignore
+        servers = data.get("compose", {}).get("servers", []) or []  # type: ignore
         names: list[str] = [
-            svc.get("name") for svc in services if svc.get("name") is not None  # type: ignore
+            svc.get("name") for svc in servers if svc.get("name") is not None  # type: ignore
         ]
 
         print(names)

@@ -39,9 +39,9 @@ class Test_CLI:
         base = isolate_cwd
 
         data: dicts = {
-            "compose": {"services": [s1, s2], "network": ["network"]},
+            "compose": {"servers": [s1, s2]},
             "envs": [e1, e2],
-            "service_files": [f1, f2],
+            "server_files": [f1, f2],
         }
         (base / "data.json").write_text(
             json.dumps(data, indent=2), encoding="utf-8"
@@ -53,16 +53,16 @@ class Test_CLI:
     def test_create(  # type: ignore
         self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        service = s1
+        server = s1
         env = e1
-        service_file = f1
+        server_file = f1
 
         from src.cli.builder import Builder
 
         monkeypatch.setattr(
             Builder,
             "_Builder__get_data",
-            lambda self, menu, name=None: (service, env, service_file),  # type: ignore
+            lambda self, menu, name=None: (server, env, server_file),  # type: ignore
         )
 
         result = self.runner.invoke(self.cli, ["create"])
@@ -74,20 +74,17 @@ class Test_CLI:
         data = json.loads((base / "data.json").read_text(encoding="utf-8"))
         assert data is not None
 
-        services = data.get("compose", {}).get("services", [])
-        assert len(services) == 1
-        assert services[0] == service
-
-        networks = data.get("compose", {}).get("networks", [])
-        assert len(networks) == 0
+        servers = data.get("compose", {}).get("servers", [])
+        assert len(servers) == 1
+        assert servers[0] == server
 
         envs = data.get("envs", [])
         assert len(envs) == 1
         assert envs[0] == env
 
-        service_files = data.get("service_files", [])
-        assert len(service_files) == 1
-        assert service_files[0] == service_file
+        server_files = data.get("server_files", [])
+        assert len(server_files) == 1
+        assert server_files[0] == server_file
 
         assert (base / "docker-compose.yml").exists()
         expected = self.__render_template(
@@ -96,7 +93,7 @@ class Test_CLI:
         actual = (base / "docker-compose.yml").read_text(encoding="utf-8")
         assert expected == actual
 
-        name = services[0].get("name")
+        name = servers[0].get("name")
 
         assert (base / "servers" / name / ".env").exists()
         expected = self.__render_template(data=envs[0], template_name=".env.j2")
@@ -140,7 +137,7 @@ class Test_CLI:
             monkeypatch.setattr(mod, "confirm", fake_confirm)
 
         result = self.runner.invoke(
-            self.cli, ["create", "--network", "network"]
+            self.cli, ["create", "--network"]
         )
         assert result.exit_code == 0
 
@@ -149,23 +146,19 @@ class Test_CLI:
         data = json.loads((base / "data.json").read_text(encoding="utf-8"))
         assert data is not None
 
-        services = data.get("compose", {}).get("services", [])
-        assert len(services) == 2
-        for svc_json, svc_expected in zip(services, (s1, s2)):
+        servers = data.get("compose", {}).get("servers", [])
+        assert len(servers) == 2
+        for svc_json, svc_expected in zip(servers, (s1, s2)):
             assert svc_json == svc_expected
-
-        networks = data.get("compose", {}).get("networks", [])
-        assert len(networks) == 1
-        assert "network" == networks[0]
 
         envs = data.get("envs", [])
         assert len(envs) == 2
         for env_json, env_expected in zip(envs, (e1, e2)):
             assert env_json == env_expected
 
-        service_files = data.get("service_files", [])
-        assert len(service_files) == 2
-        for svc_files_json, svc_files_expected in zip(service_files, (f1, f2)):
+        server_files = data.get("server_files", [])
+        assert len(server_files) == 2
+        for svc_files_json, svc_files_expected in zip(server_files, (f1, f2)):
             assert svc_files_json == svc_files_expected
 
         assert (base / "docker-compose.yml").exists()
@@ -175,7 +168,7 @@ class Test_CLI:
         actual = (base / "docker-compose.yml").read_text(encoding="utf-8")
         assert expected == actual
 
-        names = sorted([s.get("name") for s in services])
+        names = sorted([s.get("name") for s in servers])
         for i, name in enumerate(names):
             assert (base / "servers" / name / ".env").exists()
             expected = self.__render_template(
@@ -211,7 +204,7 @@ class Test_CLI:
         result = self.runner.invoke(self.cli, ["update"])
         assert result.exit_code != 0
         assert (
-            "ERROR: Missing JSON file for services. Use 'create' first."
+            "ERROR: Missing JSON file for servers. Use 'create' first."
             in result.output
         )
 
@@ -223,7 +216,7 @@ class Test_CLI:
 
         (base / "data.json").write_text(
             data=json.dumps(
-                {"compose": {"services": [], "networks": []}, "envs": []},
+                {"compose": {"servers": []}, "envs": []},
                 indent=2,
             ),
             encoding="utf-8",
@@ -231,7 +224,7 @@ class Test_CLI:
         result = self.runner.invoke(self.cli, ["update"])
         assert result.exit_code != 0
         print(result.output)
-        assert "ERROR: No services found. Use 'create' first." in result.output
+        assert "ERROR: No servers found. Use 'create' first." in result.output
 
         root = Path(__file__).resolve().parent.parent
         template = root / "src" / "assets" / "templates" / "template.json"
@@ -240,6 +233,7 @@ class Test_CLI:
         (base / "data.json").write_text(
             json.dumps(data, indent=2), encoding="utf-8"
         )
+        print(data)
         result = self.runner.invoke(self.cli, ["update"])
         assert result.exit_code != 0
         assert "Use --add, --remove or --change flag." in result.output
@@ -250,16 +244,16 @@ class Test_CLI:
         base = isolate_cwd
 
         data: dicts = {
-            "compose": {"services": [s1, s2], "network": ["network"]},
+            "compose": {"servers": [s1, s2]},
             "envs": [e1, e2],
-            "service_files": [f1, f2],
+            "server_files": [f1, f2],
         }
         (base / "data.json").write_text(
             json.dumps(data, indent=2), encoding="utf-8"
         )
 
         result = self.runner.invoke(
-            self.cli, ["update", "--service", "server1", "--remove"]
+            self.cli, ["update", "--server", "server1", "--remove"]
         )
         assert result.exit_code == 0
         assert "removed and files updated." in result.output
@@ -267,12 +261,12 @@ class Test_CLI:
         data_after = json.loads(
             (base / "data.json").read_text(encoding="utf-8")
         )
-        services_after = data_after.get("compose", {}).get("services", [])
+        servers_after = data_after.get("compose", {}).get("servers", [])
         envs_after = data_after.get("envs", [])
-        service_files_after = data_after.get("service_files", [])
-        assert all(s.get("name") != "server1" for s in services_after)
+        server_files_after = data_after.get("server_files", [])
+        assert all(s.get("name") != "server1" for s in servers_after)
         assert all(e.get("CONTAINER_NAME") != "server1" for e in envs_after)
-        assert all(f.get("name") != "server1" for f in service_files_after)
+        assert all(f.get("name") != "server1" for f in server_files_after)
 
     def test_update_add(  # type: ignore
         self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
@@ -280,9 +274,9 @@ class Test_CLI:
         base = isolate_cwd
 
         data: dicts = {
-            "compose": {"services": [s1], "network": ["network"]},
+            "compose": {"servers": [s1]},
             "envs": [e1],
-            "service_files": [f1],
+            "server_files": [f1],
         }
         (base / "data.json").write_text(
             json.dumps(data, indent=2), encoding="utf-8"
@@ -297,7 +291,7 @@ class Test_CLI:
         )
 
         result = self.runner.invoke(
-            self.cli, ["update", "--service", "new", "--add"]
+            self.cli, ["update", "--server", "new", "--add"]
         )
         assert result.exit_code == 0
 
@@ -306,16 +300,16 @@ class Test_CLI:
         )
         assert data_after is not None
 
-        services_after = data_after.get("compose", {}).get("services", [])
+        servers_after = data_after.get("compose", {}).get("servers", [])
         envs_after = data_after.get("envs", [])
-        service_files_after = data_after.get("service_files", [])
+        server_files_after = data_after.get("server_files", [])
 
-        service_names = [s.get("name") for s in services_after]
-        assert "new" in service_names
+        server_names = [s.get("name") for s in servers_after]
+        assert "new" in server_names
         env_names = [e.get("CONTAINER_NAME") for e in envs_after]
         assert "new" in env_names
-        service_files_names = [f.get("name") for f in service_files_after]
-        assert "new" in service_files_names
+        server_files_names = [f.get("name") for f in server_files_after]
+        assert "new" in server_files_names
 
     def test_update_change(  # type: ignore
         self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
@@ -323,16 +317,16 @@ class Test_CLI:
         base = isolate_cwd
 
         data: dicts = {
-            "compose": {"services": [s1], "network": ["network"]},
+            "compose": {"servers": [s1]},
             "envs": [e1],
-            "service_files": [f1],
+            "server_files": [f1],
         }
         (base / "data.json").write_text(
             json.dumps(data, indent=2), encoding="utf-8"
         )
 
-        changed_service = s2
-        changed_service["name"] = s1["name"]
+        changed_server = s2
+        changed_server["name"] = s1["name"]
         changed_env = e2
         changed_env["CONTAINER_NAME"] = e1["CONTAINER_NAME"]
         changed_svc_files = f2
@@ -343,11 +337,11 @@ class Test_CLI:
         monkeypatch.setattr(
             Builder,
             "_Builder__get_data",
-            lambda self, menu, name=None: (changed_service, changed_env, changed_svc_files),  # type: ignore
+            lambda self, menu, name=None: (changed_server, changed_env, changed_svc_files),  # type: ignore
         )
 
         result = self.runner.invoke(
-            self.cli, ["update", "--service", "server1", "--change"]
+            self.cli, ["update", "--server", "server1", "--change"]
         )
         assert result.exit_code == 0
 
@@ -356,20 +350,17 @@ class Test_CLI:
         )
         assert data_after is not None
 
-        services_after = data_after.get("compose", {}).get("services", [])
-        assert len(services_after) == 1
-        assert services_after[0] == changed_service
-
-        networks_after = data_after.get("compose", {}).get("networks", [])
-        assert len(networks_after) == 0
+        servers_after = data_after.get("compose", {}).get("servers", [])
+        assert len(servers_after) == 1
+        assert servers_after[0] == changed_server
 
         envs_after = data_after.get("envs", [])
         assert len(envs_after) == 1
         assert envs_after[0] == changed_env
 
-        service_files_after = data_after.get("service_files", [])
-        assert len(service_files_after) == 1
-        assert service_files_after[0] == changed_svc_files
+        server_files_after = data_after.get("server_files", [])
+        assert len(server_files_after) == 1
+        assert server_files_after[0] == changed_svc_files
 
     def test_build_errors(self, isolate_cwd: Path) -> None:
         base = isolate_cwd
@@ -379,7 +370,7 @@ class Test_CLI:
         result = self.runner.invoke(self.cli, ["build"])
         assert result.exit_code != 0
         assert (
-            "ERROR: Missing JSON file for services. Use 'create' first."
+            "ERROR: Missing JSON file for servers. Use 'create' first."
             in result.output
         )
 

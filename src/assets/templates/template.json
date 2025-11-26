@@ -1,6 +1,6 @@
 {
   "compose": {
-    "services": [
+    "servers": [
       {
         "name": "server",
         "build": {
@@ -11,7 +11,6 @@
           "25565:25565"
         ],
         "expose": [],
-        "networks": [],
         "resources": {
           "limits": {
             "cpus": 1,
@@ -23,8 +22,7 @@
           }
         }
       }
-    ],
-    "networks": []
+    ]
   },
   "envs": [
     {
@@ -38,7 +36,7 @@
       }
     }
   ],
-  "service_files": [
+  "server_files": [
     {
       "name": "server",
       "server": {

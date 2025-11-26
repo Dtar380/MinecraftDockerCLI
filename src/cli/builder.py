@@ -23,9 +23,9 @@ dicts = dict[str, Any]
 
 class Builder(CustomGroup):
 
-    no_json: str = "ERROR: Missing JSON file for services. Use 'create' first."
+    no_json: str = "ERROR: Missing JSON file for servers. Use 'create' first."
     no_data: str = "ERROR: JSON file is empty. Use 'create' first."
-    no_services: str = "ERROR: No services found. Use 'create' first."
+    no_servers: str = "ERROR: No servers found. Use 'create' first."
 
     def __init__(self) -> None:
         super().__init__()
@@ -34,73 +34,66 @@ class Builder(CustomGroup):
 
     def create(self) -> Command:
         help = "Create all files for the containerization."
-        options = [Option(["--network"], type=str, default=None)]
+        options = [Option(["--network"], is_flag=True, default=False)]
 
-        def callback(network: str | None = None) -> None:
+        def callback(network: bool = False) -> None:
             clear(0)
 
-            services: dict[str, dicts] = {}
-            networks: dict[str, str] = {}
+            servers: dict[str, dicts] = {}
             envs: dict[str, dicts] = {}
-            service_files: dict[str, dicts] = {}
+            server_files: dict[str, dicts] = {}
 
             if self.cwd.joinpath("data.json").exists():
                 exit(
                     "ERROR: data.json already exists, delete it or use another command."
                 )
 
+            menu = Menus()
+
             if not network:
-                menu = Menus()
-                service, env, service_file = self.__get_data(menu)
+                server, env, server_file = self.__get_data(menu)
                 name: str = menu.name  # type: ignore
-                services[name] = service
+                servers[name] = server
                 envs[name] = env
-                service_files[name] = service_file
-
+                server_files[name] = server_file
             else:
-                networks[network] = network
-
-                menu = Menus(network=network)
-
                 idx = 0
                 while True:
                     menu.ports = {}
 
                     if idx == 0:
-                        print("Creating proxy service...")
-                    service, env, service_file = self.__get_data(
+                        print("Creating proxy server...")
+                    server, env, server_file = self.__get_data(
                         menu, name="proxy" if idx == 0 else None
                     )
                     name: str = menu.name  # type: ignore
-                    services[name] = service
+                    servers[name] = server
                     envs[name] = env
-                    service_files[name] = service_file
+                    server_files[name] = server_file
 
                     clear(0.5)
 
                     if idx >= 1 and not confirm(
-                        msg=f"Want to continue adding services? (Count: {len(services)})"
+                        msg=f"Want to continue adding servers? (Count: {len(servers)})"
                     ):
                         break
 
                     idx += 1
 
-            services_list = [svc for _, svc in services.items()]
-            networks_list = [net for _, net in networks.items()]
+            servers_list = [svc for _, svc in servers.items()]
             envs_list = [env for _, env in envs.items()]
-            service_files_list = [
-                svc_file for _, svc_file in service_files.items()
+            server_files_list = [
+                svc_file for _, svc_file in server_files.items()
             ]
 
             clear(0)
             self.file_manager.save_files(
                 data={
                     "compose": {
-                        "services": services_list,
-                        "networks": networks_list,
+                        "servers": servers_list,
                     },
                     "envs": envs_list,
-                    "service_files": service_files_list,
+                    "server_files": server_files_list,
                 }
             )
             clear(0)
@@ -116,14 +109,14 @@ class Builder(CustomGroup):
     def update(self) -> Command:
         help = "Update the contents of the containers."
         options = [
-            Option(["--service"], type=self.service_type, default=None),
+            Option(["--server"], type=self.server_type, default=None),
             Option(["--add"], is_flag=True, default=False),
             Option(["--remove"], is_flag=True, default=False),
             Option(["--change"], is_flag=True, default=False),
         ]
 
         def callback(
-            service: str | None = None,
+            server: str | None = None,
             add: bool = False,
             remove: bool = False,
             change: bool = False,
@@ -145,183 +138,161 @@ class Builder(CustomGroup):
 
             compose: dicts = data.get("compose", {}) or {}
 
-            services_list: list[dicts] = compose.get("services", []) or []
-            networks_list: list[str] = compose.get("networks", []) or []
+            servers_list: list[dicts] = compose.get("servers", []) or []
             envs_list: list[dicts] = data.get("envs", []) or []
-            service_files_list: list[dicts] = (
-                data.get("service_files", []) or []
+            server_files_list: list[dicts] = (
+                data.get("server_files", []) or []
             )
 
-            services: dict[Any, dicts] = {
-                svc.get("name"): svc for svc in services_list
+            servers: dict[Any, dicts] = {
+                svc.get("name"): svc for svc in servers_list
             }
-            networks: dict[str, str] = {net: net for net in networks_list}
             envs: dict[Any, dicts] = {
                 env.get("CONTAINER_NAME"): env for env in envs_list
             }
-            service_files: dict[Any, dicts] = {
+            server_files: dict[Any, dicts] = {
                 svc_file.get("name"): svc_file
-                for svc_file in service_files_list
+                for svc_file in server_files_list
             }
 
-            if not services:
-                exit(self.no_services)
+            if not servers:
+                exit(self.no_servers)
 
             def find_index_by_name(name: str) -> int | None:
-                for i, s in enumerate(services_list):
+                for i, s in enumerate(servers_list):
                     if s.get("name") == name:
                         return i
                 return None
 
             if remove:
-                target = service
+                target = server
                 if not target:
                     names = [
-                        s.get("name") for s in services_list if s.get("name")
+                        s.get("name") for s in servers_list if s.get("name")
                     ]
                     if not names:
-                        exit("ERROR: No services found.")
+                        exit("ERROR: No servers found.")
 
                     target = inquirer.select(  # type: ignore
-                        message="Select a service to remove: ", choices=names
+                        message="Select a server to remove: ", choices=names
                     ).execute()
 
                 idx = find_index_by_name(target)  # type: ignore
                 if idx is None:
-                    exit(f"ERROR: Service '{target}' not found.")
+                    exit(f"ERROR: server '{target}' not found.")
 
                 clear(0.5)
 
-                if confirm(msg=f"Remove service '{target}'", default=False):
-                    services_list.pop(idx)
+                if confirm(msg=f"Remove server '{target}'", default=False):
+                    servers_list.pop(idx)
                     envs_list = [
                         e
                         for e in envs_list
                         if e.get("CONTAINER_NAME") != target
                     ]
-                    service_files_list = [
-                        f for f in service_files_list if f.get("name") != target
+                    server_files_list = [
+                        f for f in server_files_list if f.get("name") != target
                     ]
-                    compose["services"] = services_list
-                    compose["networks"] = networks_list
+                    compose["servers"] = servers_list
                     data["compose"] = compose
                     data["envs"] = envs_list
-                    data["service_files"] = service_files_list
+                    data["server_files"] = server_files_list
                     self.file_manager.save_files(data)
-                    print(f"Service '{target}' removed and files updated.")
+                    print(f"server '{target}' removed and files updated.")
 
             elif add:
-                name = service
+                name = server
                 if not name:
-                    name = self.__get_name("Enter the name of the service: ")
+                    name = self.__get_name("Enter the name of the server: ")
                 if find_index_by_name(name):
                     if not confirm(
-                        msg=f"Service '{name}' already exists. Overwrite? "
+                        msg=f"server '{name}' already exists. Overwrite? "
                     ):
                         exit("WARNING: Add cancelled.")
 
-                network = None
-                if networks:
-                    network = inquirer.select(  # type: ignore
-                        message="Select a network: ",
-                        choices=networks_list,
-                        validate=EmptyInputValidator(),
-                    ).execute()
-                menu = Menus(network=network)
+                menu = Menus()
 
-                service_obj, env_obj, svc_file_obj = self.__get_data(menu, name)
-                service_obj["name"] = name
+                server_obj, env_obj, svc_file_obj = self.__get_data(menu, name)
+                server_obj["name"] = name
                 env_obj["CONTAINER_NAME"] = name
                 svc_file_obj["name"] = name
 
-                services[name] = service_obj
+                servers[name] = server_obj
                 envs[name] = env_obj
-                service_files[name] = svc_file_obj
+                server_files[name] = svc_file_obj
 
                 clear(0.5)
 
-                if confirm(msg=f"Add service '{name}'"):
-                    services_list = [svc for _, svc in services.items()]
-                    networks_list = [net for _, net in networks.items()]
+                if confirm(msg=f"Add server '{name}'"):
+                    servers_list = [svc for _, svc in servers.items()]
                     envs_list = [env for _, env in envs.items()]
-                    service_files_list = [
-                        svc_file for _, svc_file in service_files.items()
+                    server_files_list = [
+                        svc_file for _, svc_file in server_files.items()
                     ]
 
-                    compose["services"] = services_list
-                    compose["networks"] = networks_list
+                    compose["servers"] = servers_list
                     data["compose"] = compose
                     data["envs"] = envs_list
-                    data["service_files"] = service_files_list
+                    data["server_files"] = server_files_list
                     self.file_manager.save_files(data)
-                    print(f"Service '{name}' removed and files updated.")
+                    print(f"server '{name}' removed and files updated.")
 
             elif change:
-                name = service
-                names = [svc.get("name") for svc in services_list]
+                name = server
+                names = [svc.get("name") for svc in servers_list]
                 if not name:
                     name = str(
                         inquirer.select(  # type: ignore
-                            message="Select the service: ",
+                            message="Select the server: ",
                             choices=names,
                             validate=EmptyInputValidator(),
                         ).execute()
                     )
                 idx_svc = find_index_by_name(name)
                 if idx_svc is None:
-                    exit(f"ERROR: Service '{name}' not found.")
+                    exit(f"ERROR: server '{name}' not found.")
 
-                network = None
-                if networks:
-                    network = inquirer.select(  # type: ignore
-                        message="Select a network: ",
-                        choices=networks_list,
-                        validate=EmptyInputValidator(),
-                    ).execute()
-
-                service_obj = services_list[idx_svc]
+                server_obj = servers_list[idx_svc]
                 env_obj = envs_list[idx_svc]
-                svc_file_obj = service_files_list[idx_svc]
+                svc_file_obj = server_files_list[idx_svc]
 
                 defaults = {
-                    "service": service_obj,
+                    "server": server_obj,
                     "env": env_obj,
-                    "service_files": svc_file_obj,
+                    "server_files": svc_file_obj,
                 }
 
-                menu = Menus(network=network, defaults=defaults)
+                menu = Menus(defaults=defaults)
 
-                service_obj, env_obj, svc_file_obj = self.__get_data(menu, name)
-                service_obj["name"] = name
+                server_obj, env_obj, svc_file_obj = self.__get_data(menu, name)
+                server_obj["name"] = name
                 env_obj["CONTAINER_NAME"] = name
                 svc_file_obj["name"] = name
 
-                services[name] = service_obj
+                servers[name] = server_obj
                 envs[name] = env_obj
-                service_files[name] = svc_file_obj
+                server_files[name] = svc_file_obj
 
                 clear(0.5)
 
-                if confirm(msg=f"Update service '{name}'"):
-                    services_list = [svc for _, svc in services.items()]
-                    networks_list = [net for _, net in networks.items()]
+                if confirm(msg=f"Update server '{name}'"):
+                    servers_list = [svc for _, svc in servers.items()]
                     envs_list = [env for _, env in envs.items()]
-                    service_files_list = [
-                        svc_file for _, svc_file in service_files.items()
+                    server_files_list = [
+                        svc_file for _, svc_file in server_files.items()
                     ]
 
-                    compose["services"] = services_list
-                    compose["networks"] = networks_list
+                    compose["servers"] = servers_list
                     data["compose"] = compose
                     data["envs"] = envs_list
-                    data["service_files"] = service_files_list
+                    data["server_files"] = server_files_list
                     self.file_manager.save_files(data)
-                    print(f"Service '{name}' removed and files updated.")
+                    print(f"server '{name}' removed and files updated.")
 
             else:
                 print("Use --add, --remove or --change flag.")
-                print("Use --services [service] for faster output.")
-                for s in services:
+                print("Use --servers [server] for faster output.")
+                for s in servers:
                     print(f" - {s.get('name')}")
 
         return Command(
@@ -364,15 +335,15 @@ class Builder(CustomGroup):
         self, menu: Menus, name: str | None = None
     ) -> tuple[dicts, dicts, dicts]:
         if not name:
-            name = self.__get_name(message="Enter the name of the service: ")
+            name = self.__get_name(message="Enter the name of the server: ")
 
         menu.name = name
 
-        service = menu.service()
+        server = menu.server()
         env = menu.env()
-        service_files = menu.service_files()
+        server_files = menu.server_files()
 
-        return (service, env, service_files)
+        return (server, env, server_files)
 
     def __get_name(self, message: str) -> str:
         while True:
@@ -382,7 +353,7 @@ class Builder(CustomGroup):
             ).execute()
 
             if confirm(
-                msg=f"Want to name this service '{name}'? ",
+                msg=f"Want to name this server '{name}'? ",
                 default=True,
             ):
                 break

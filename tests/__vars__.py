@@ -10,7 +10,6 @@ s1: dicts = {
     "env_file": "./servers/server1/.env",
     "ports": ["25565:25565"],
     "expose": [],
-    "networks": [],
     "resources": {
         "limits": {"cpus": 1, "memory": "1g"},
         "reservations": {"cpus": 1, "memory": "1g"},
@@ -23,7 +22,6 @@ s2: dicts = {
     "env_file": "./servers/server2/.env",
     "ports": ["25565:25565"],
     "expose": [],
-    "networks": [],
     "resources": {
         "limits": {"cpus": 1, "memory": "1g"},
         "reservations": {"cpus": 1, "memory": "1g"},

@@ -1,0 +1,23 @@
+# Carpetas que no deben copiarse
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+build/
+dist/
+.coverage
+pytest_cache/
+
+# Archivos de entorno local
+.env
+.env.local
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode/
+.idea/

@@ -23,9 +23,9 @@ class Manager(CustomGroup):
         self.file_manager.sleep = 2
 
     def open(self) -> Command:
-        help = "Open the terminal of a service."
+        help = "Open the terminal of a server."
         options = [
-            Option(["--service"], type=self.service_type, default=None),
+            Option(["--server"], type=self.server_type, default=None),
             Option(
                 ["--detach-keys"],
                 type=self.detach_keys_type,
@@ -33,8 +33,8 @@ class Manager(CustomGroup):
             ),
         ]
 
-        def callback(service: str, detach_keys: str = "ctrl-p,ctrl-q") -> None:
-            self.compose_manager.open_terminal(service, detach_keys)
+        def callback(server: str, detach_keys: str = "ctrl-p,ctrl-q") -> None:
+            self.compose_manager.open_terminal(server, detach_keys)
 
         return Command(
             name=inspect.currentframe().f_code.co_name,  # type: ignore

@@ -66,21 +66,21 @@ DETACH_KEYS = DetachKeysType()
 DETACH_KEYS.help = DetachKeysType.help  # type: ignore[attr-defined]
 
 
-class ServiceType(ParamType):
-    """ParamType for service names used by `CustomGroup`.
+class ServerType(ParamType):
+    """ParamType for server names used by `CustomGroup`.
 
     This type can be constructed without choices and later populated with
     `set_choices()`. The convert method will validate that the provided
     value is one of the known choices when choices have been set.
     """
 
-    name = "service-type"
+    name = "server-type"
 
     # Generic help message; can be enriched with available choices at runtime
-    help = "Service name. If available, valid choices will be listed in the help message."
+    help = "Server name. If available, valid choices will be listed in the help message."
 
     def get_metavar(self, param: Any, ctx: Any = None) -> str:
-        return "SERVICE"
+        return "SERVER"
 
     def __init__(self, choices: list[str] | None = None) -> None:
         self.choices: list[str] = choices or []
@@ -92,10 +92,10 @@ class ServiceType(ParamType):
         if value is None:
             return value
         if not isinstance(value, str):
-            self.fail("service type must be a string", param, ctx)
+            self.fail("server type must be a string", param, ctx)
         if self.choices and value not in self.choices:
             self.fail(
-                f"Invalid service '{value}'. Available: {', '.join(self.choices)}",
+                f"Invalid server '{value}'. Available: {', '.join(self.choices)}",
                 param,
                 ctx,
             )
@@ -103,5 +103,5 @@ class ServiceType(ParamType):
 
 
 # Reusable empty instance (can be populated later)
-SERVICE_TYPE = ServiceType()
-SERVICE_TYPE.help = ServiceType.help  # type: ignore[attr-defined]
+SERVER_TYPE = ServerType()
+SERVER_TYPE.help = ServerType.help  # type: ignore[attr-defined]

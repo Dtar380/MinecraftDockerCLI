@@ -1,5 +1,5 @@
 services:
-{% for svc in services %}
+{% for svc in servers %}
   {{ svc.name }}:
     build:
       context: {{ svc.build.context }}
@@ -44,11 +44,3 @@ services:
 {% endif %}
 {% endif %}
 {% endfor %}
-
-{% if networks %}
-networks:
-{% for net_name in networks %}
-  {{ net_name }}:
-    driver: bridge
-{% endfor %}
-{% endif %}

@@ -12,7 +12,7 @@ from click import Command, Group
 
 from ..core.docker import ComposeManager
 from ..core.files import FileManager
-from .param_types import DETACH_KEYS, SERVICE_TYPE, ServiceType
+from .param_types import DETACH_KEYS, SERVER_TYPE, ServerType
 
 #################################################
 # CODE
@@ -26,7 +26,7 @@ class CustomGroup(Group):
 
     # class-level param types (can be overridden per-instance)
     detach_keys_type = DETACH_KEYS
-    service_type: ServiceType = SERVICE_TYPE
+    server_type: ServerType = SERVER_TYPE
 
     def __init__(self) -> None:
         super().__init__()
@@ -34,33 +34,27 @@ class CustomGroup(Group):
         self.compose_manager = ComposeManager()
 
         try:
-            services = self.compose_manager.get_services()
+            data: dicts = (
+                self.file_manager.read_json(self.cwd.joinpath("data.json"))
+                or {}
+            )
+            compose: dicts = data.get("compose", {}) or {}
+            svc_list: list[dicts] = compose.get("servers", []) or []
+            names: list[str] = []
+            for s in svc_list:
+                name = s.get("name")
+                if isinstance(name, str):
+                    names.append(name)
+            servers = names
         except Exception:
-            services = []
+            servers = []
 
-        if not services:
-            try:
-                data: dicts = (
-                    self.file_manager.read_json(self.cwd.joinpath("data.json"))
-                    or {}
-                )
-                compose: dicts = data.get("compose", {}) or {}
-                svc_list: list[dicts] = compose.get("services", []) or []
-                names: list[str] = []
-                for s in svc_list:
-                    name = s.get("name")
-                    if isinstance(name, str):
-                        names.append(name)
-                services = names
-            except Exception:
-                services = []
-
-        if services:
-            # create an instance bound to the discovered service names
-            self.service_type = ServiceType([str(s) for s in services])
+        if servers:
+            # create an instance bound to the discovered server names
+            self.server_type = ServerType([str(s) for s in servers])
         else:
             # keep the shared empty instance (no choices)
-            self.service_type = SERVICE_TYPE
+            self.server_type = SERVER_TYPE
 
         self.__register_commands()
 
