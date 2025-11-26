@@ -139,6 +139,7 @@ class FileManager:
 
     @yaspin(text="Copying web files...", color="cyan")
     def copy_web_files(self, path: Path) -> None:
+        sleep(self.sleep)
         docker_pkg = files("src.assets.docker")
         frontend_dockerfile_res = docker_pkg.joinpath("node.Dockerfile")
         frontend_dockerignore_res = docker_pkg.joinpath("node.dockerignore")
@@ -153,14 +154,18 @@ class FileManager:
         backend_dockerfile_bytes = backend_dockerfile_res.read_bytes()
         backend_dockerignore_bytes = backend_dockerignore_res.read_bytes()
 
-        web_dir = path.joinpath("/web")
-        frontend_dir = web_dir.joinpath("/frontend")
-        backend_dir = web_dir.joinpath("/backend")
+        web_dir = path.joinpath("web")
+        web_dir.mkdir(parents=True, exist_ok=True)
+
+        frontend_dir = web_dir.joinpath("frontend")
+        backend_dir = web_dir.joinpath("backend")
         frontend_dir.mkdir(parents=True, exist_ok=True)
         backend_dir.mkdir(parents=True, exist_ok=True)
 
         (frontend_dir / "Dockerfile").write_bytes(frontend_dockerfile_bytes)
-        (frontend_dir / ".dockerignore").write_bytes(frontend_dockerignore_bytes)
+        (frontend_dir / ".dockerignore").write_bytes(
+            frontend_dockerignore_bytes
+        )
         (backend_dir / "Dockerfile").write_bytes(backend_dockerfile_bytes)
         (backend_dir / ".dockerignore").write_bytes(backend_dockerignore_bytes)
 

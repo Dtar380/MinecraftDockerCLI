@@ -82,10 +82,10 @@ class Builder(CustomGroup):
 
                     idx += 1
 
-                if confirm(msg=f"Want to use a sql database?"):
+                if confirm(msg="Want to use a sql database?"):
                     database = menu.database()
 
-                if confirm(msg=f"Want to add a web server?"):
+                if confirm(msg="Want to add a web server?"):
                     web = True
 
             servers_list = [svc for _, svc in servers.items()]
@@ -100,7 +100,7 @@ class Builder(CustomGroup):
                     "compose": {
                         "servers": servers_list,
                         "database": database,
-                        "web": web
+                        "web": web,
                     },
                     "envs": envs_list,
                     "server_files": server_files_list,
@@ -150,9 +150,7 @@ class Builder(CustomGroup):
 
             servers_list: list[dicts] = compose.get("servers", []) or []
             envs_list: list[dicts] = data.get("envs", []) or []
-            server_files_list: list[dicts] = (
-                data.get("server_files", []) or []
-            )
+            server_files_list: list[dicts] = data.get("server_files", []) or []
 
             servers: dict[Any, dicts] = {
                 svc.get("name"): svc for svc in servers_list
@@ -161,8 +159,7 @@ class Builder(CustomGroup):
                 env.get("CONTAINER_NAME"): env for env in envs_list
             }
             server_files: dict[Any, dicts] = {
-                svc_file.get("name"): svc_file
-                for svc_file in server_files_list
+                svc_file.get("name"): svc_file for svc_file in server_files_list
             }
 
             if not servers:

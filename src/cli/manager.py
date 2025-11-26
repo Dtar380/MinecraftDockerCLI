@@ -69,7 +69,9 @@ class Manager(CustomGroup):
             ),
         ]
 
-        def callback(attached: bool = False, detach_keys: str = "ctrl-p,ctrl-q") -> None:
+        def callback(
+            attached: bool = False, detach_keys: str = "ctrl-p,ctrl-q"
+        ) -> None:
             self.compose_manager.up(attached, detach_keys)
 
         return Command(

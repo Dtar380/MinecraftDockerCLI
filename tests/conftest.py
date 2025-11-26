@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import importlib
 from pathlib import Path
 from typing import Any, Callable, TypeVar
 
-import importlib
 import pytest  # type: ignore
 
 
@@ -171,8 +171,8 @@ def zero_sleep(monkeypatch: pytest.MonkeyPatch) -> None:
             except Exception:
                 builder_inst = None
 
-        import src.core.files as _files
         import src.core.docker as _docker
+        import src.core.files as _files
 
         # Patch class-level defaults so future instances are fast
         monkeypatch.setattr(_files.FileManager, "sleep", 0, raising=False)

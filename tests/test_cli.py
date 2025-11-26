@@ -123,7 +123,7 @@ class Test_CLI:
 
         monkeypatch.setattr(Builder, "_Builder__get_data", get_data)
 
-        confirms = [True, True, False, False, False]
+        confirms = [False, False]
 
         def fake_confirm(msg: str, default: bool = True) -> bool:
             try:
@@ -136,9 +136,8 @@ class Test_CLI:
             mod = import_module(mod_name)
             monkeypatch.setattr(mod, "confirm", fake_confirm)
 
-        result = self.runner.invoke(
-            self.cli, ["create", "--network"]
-        )
+        result = self.runner.invoke(self.cli, ["create", "--network"])
+        print(result.output)
         assert result.exit_code == 0
 
         base = isolate_cwd
@@ -182,6 +181,8 @@ class Test_CLI:
             assert (base / "servers" / name / "Dockerfile").exists()
             assert (base / "servers" / name / "run.sh").exists()
             assert (base / "servers" / name / "data" / "eula.txt").exists()
+
+        assert (base / "web").exists()
 
     def test_update_errors(self, isolate_cwd: Path) -> None:
         result = self.runner.invoke(self.cli, ["update", "--add", "--remove"])

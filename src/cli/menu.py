@@ -9,7 +9,10 @@ from typing import Any
 
 from InquirerPy import inquirer  # type: ignore
 from InquirerPy.base.control import Choice  # type: ignore
-from InquirerPy.validator import EmptyInputValidator, PasswordValidator  # type: ignore
+from InquirerPy.validator import (  # type: ignore
+    EmptyInputValidator,
+    PasswordValidator,
+)
 from importlib_resources import files  # type: ignore
 import psutil  # type: ignore
 
@@ -99,7 +102,7 @@ class Menus:
             port_name = inquirer.text(  # type: ignore
                 message="Add a name for the port: ",
                 default=name_default,
-                validate=EmptyInputValidator()
+                validate=EmptyInputValidator(),
             ).execute()
 
             port = inquirer.number(  # type: ignore
@@ -107,7 +110,7 @@ class Menus:
                 min_allowed=1,
                 max_allowed=2**16 - 1,
                 default=port_default,
-                validate=EmptyInputValidator()
+                validate=EmptyInputValidator(),
             ).execute()
 
             if confirm(
@@ -142,12 +145,14 @@ class Menus:
                 resources = self.defaults["server"]["resources"]
                 def_cpus_limit = float(resources["limits"]["cpus"])
                 def_cpus_reservation = float(resources["reservations"]["cpus"])
-                def_memory_limit = int(float(
-                    resources["limits"]["memory"].removesuffix("g")
-                ) * 1024)
-                def_memory_reservation = int(float(
-                    resources["reservations"]["memory"].removesuffix("g")
-                ) * 1024)
+                def_memory_limit = int(
+                    float(resources["limits"]["memory"].removesuffix("g"))
+                    * 1024
+                )
+                def_memory_reservation = int(
+                    float(resources["reservations"]["memory"].removesuffix("g"))
+                    * 1024
+                )
             else:
                 def_cpus_limit = 1
                 def_cpus_reservation = 0
@@ -161,7 +166,7 @@ class Menus:
                     max_allowed=self.cpus,
                     float_allowed=True,
                     default=def_cpus_limit,
-                    validate=EmptyInputValidator()
+                    validate=EmptyInputValidator(),
                 ).execute()
             )
             cpus_reservation: float = float(
@@ -171,7 +176,7 @@ class Menus:
                     max_allowed=cpus_limit,
                     float_allowed=True,
                     default=def_cpus_reservation,
-                    validate=EmptyInputValidator()
+                    validate=EmptyInputValidator(),
                 ).execute()
             )
 
@@ -182,7 +187,7 @@ class Menus:
                     max_allowed=self.memory,
                     float_allowed=False,
                     default=def_memory_limit,
-                    validate=EmptyInputValidator()
+                    validate=EmptyInputValidator(),
                 ).execute()
             )
             memory_reservation: int = int(
@@ -192,7 +197,7 @@ class Menus:
                     max_allowed=memory_limit,
                     float_allowed=False,
                     default=def_memory_reservation,
-                    validate=EmptyInputValidator()
+                    validate=EmptyInputValidator(),
                 ).execute()
             )
 
@@ -251,7 +256,7 @@ class Menus:
 
         if confirm(
             msg="Want to use recommended args for the server? ",
-            default=False if "proxy" in self.name else True
+            default=False if "proxy" in self.name else True,
         ):
             txt_file = Path(files("src.assets.config").joinpath("recommended-args.txt"))  # type: ignore
             with open(txt_file, "r+") as f:  # type: ignore
@@ -270,7 +275,7 @@ class Menus:
                     max_allowed=self.resources["limits"]["memory"],
                     float_allowed=False,
                     default=self.resources["reservations"]["memory"],
-                    validate=EmptyInputValidator()
+                    validate=EmptyInputValidator(),
                 ).execute()
             )
 
@@ -281,7 +286,7 @@ class Menus:
                     max_allowed=self.resources["limits"]["memory"],
                     float_allowed=False,
                     default=self.resources["limits"]["memory"],
-                    validate=EmptyInputValidator()
+                    validate=EmptyInputValidator(),
                 ).execute()
             )
 
@@ -334,29 +339,31 @@ class Menus:
         return {
             "user": self.__get_name("Enter a username: "),
             "password": self.__get_password(),
-            "db": self.__get_name("Enter a name for the database: ")
+            "db": self.__get_name("Enter a name for the database: "),
         }
 
     def __get_name(self, msg: str) -> str:
         while True:
-            name = str(inquirer.text(  # type: ignore
-                message=msg,
-                validate=EmptyInputValidator()
-            ).execute())
+            name = str(
+                inquirer.text(  # type: ignore
+                    message=msg, validate=EmptyInputValidator()
+                ).execute()
+            )
 
-            if confirm(
-                msg="Confirm your input: "
-            ): return name
+            if confirm(msg="Confirm your input: "):
+                return name
 
     def __get_password(self) -> str:
-        password = str(inquirer.secret(  # type: ignore
-            message="Enter your database password: ",
-            validate=PasswordValidator(
-                length=8,
-                cap=True,
-                number=True,
-                message="Password must have 8+ characters, caps and numbers."
-            )
-        ).execute())
+        password = str(
+            inquirer.secret(  # type: ignore
+                message="Enter your database password: ",
+                validate=PasswordValidator(
+                    length=8,
+                    cap=True,
+                    number=True,
+                    message="Password must have 8+ characters, caps and numbers.",
+                ),
+            ).execute()
+        )
 
         return password

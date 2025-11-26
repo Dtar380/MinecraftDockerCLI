@@ -64,7 +64,9 @@ class ComposeManager:
         return self.__run(*args)
 
     @yaspin(text="Putting Up Container...", color="cyan")
-    def up(self, attached: bool = True, detach_keys: str = "ctrl-p,ctrl-q") -> CompletedProcess[str]:
+    def up(
+        self, attached: bool = True, detach_keys: str = "ctrl-p,ctrl-q"
+    ) -> CompletedProcess[str]:
         sleep(self.sleep)
 
         args = ["up", "--build"]
