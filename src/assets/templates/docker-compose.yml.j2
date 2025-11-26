@@ -44,3 +44,38 @@ services:
 {% endif %}
 {% endif %}
 {% endfor %}
+{% if database %}
+  db:
+    image: postgres
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: {{ database.user }}
+      POSTGRES_PASSWORD: {{ database.password }}
+      POSTGRES_DB: {{ database.db }}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+{% endif %}
+{% if web %}
+  frontend:
+    build: ./frontend
+    container_name: frontend_app
+    ports:
+      - "80:80"   # Host:Container
+    depends_on:
+      - web
+
+  backend:
+    build: ./backend
+    container_name: web_server
+    ports:
+      - "8000:8000"
+{% if database %}
+    environment:
+      - DATABASE_URL=postgresql://{{ database.user }}:{{ database.password }}@db:5432/{{ database.db }}
+    depends_on:
+      - db
+{% endif %}
+{% endif %}

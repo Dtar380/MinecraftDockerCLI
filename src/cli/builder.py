@@ -40,6 +40,8 @@ class Builder(CustomGroup):
             clear(0)
 
             servers: dict[str, dicts] = {}
+            database: dict[str, str] = {}
+            web: bool = False
             envs: dict[str, dicts] = {}
             server_files: dict[str, dicts] = {}
 
@@ -73,12 +75,25 @@ class Builder(CustomGroup):
 
                     clear(0.5)
 
-                    if idx >= 1 and not confirm(
-                        msg=f"Want to continue adding servers? (Count: {len(servers)})"
-                    ):
+                    if idx >= 1 and not inquirer.confirm(  # type: ignore
+                        message=f"Want to continue adding servers? (Count: {len(servers)})",
+                        default=True
+                    ).execute():
                         break
 
                     idx += 1
+
+                if inquirer.confirm(  # type: ignore
+                    message=f"Want to use a sql database?",
+                    default=True
+                ).execute():
+                    database = menu.database()
+
+                if inquirer.confirm(  # type: ignore
+                    message=f"Want to add a web server?",
+                    default=True
+                ).execute():
+                    web = True
 
             servers_list = [svc for _, svc in servers.items()]
             envs_list = [env for _, env in envs.items()]
@@ -91,6 +106,8 @@ class Builder(CustomGroup):
                 data={
                     "compose": {
                         "servers": servers_list,
+                        "database": database,
+                        "web": web
                     },
                     "envs": envs_list,
                     "server_files": server_files_list,

@@ -9,7 +9,7 @@ from typing import Any
 
 from InquirerPy import inquirer  # type: ignore
 from InquirerPy.base.control import Choice  # type: ignore
-from InquirerPy.validator import EmptyInputValidator  # type: ignore
+from InquirerPy.validator import EmptyInputValidator, PasswordValidator  # type: ignore
 from importlib_resources import files  # type: ignore
 import psutil  # type: ignore
 
@@ -329,3 +329,34 @@ class Menus:
         return inquirer.select(  # type: ignore
             message="Select the version: ", choices=choices
         ).execute()
+
+    def database(self) -> dict[str, str]:
+        return {
+            "user": self.__get_name("Enter a username: "),
+            "password": self.__get_password(),
+            "db": self.__get_name("Enter a name for the database: ")
+        }
+
+    def __get_name(self, msg: str) -> str:
+        while True:
+            name = str(inquirer.text(  # type: ignore
+                message=msg,
+                validate=EmptyInputValidator()
+            ).execute())
+
+            if confirm(
+                msg="Confirm your input: "
+            ): return name
+
+    def __get_password(self) -> str:
+        password = str(inquirer.secret(  # type: ignore
+            message="Enter your database password: ",
+            validate=PasswordValidator(
+                length=8,
+                cap=True,
+                number=True,
+                message="Password must have 8+ characters, caps and numbers."
+            )
+        ).execute())
+
+        return password

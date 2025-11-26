@@ -22,7 +22,13 @@
           }
         }
       }
-    ]
+    ],
+    "database": {
+      "user": "user",
+      "password": "password",
+      "db": "mydb"
+    },
+    "web": true
   },
   "envs": [
     {
