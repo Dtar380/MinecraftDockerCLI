@@ -115,45 +115,69 @@ class ComposeManager:
         data: dict[str, Any] = self.file_manager.read_json(compose_json) or {}
         if not data:
             exit("ERROR: data.json is empty")
+
         servers = data.get("compose", {}).get("servers", []) or []  # type: ignore
         names: list[str] = [
             svc.get("name") for svc in servers if svc.get("name") is not None  # type: ignore
         ]
 
-        print(names)
         for svc_name in names:
             tar_file = backup_path.joinpath(
-                f"{svc_name}_{strftime("%d-%m-%Y_%H:%M:%S")}.tar.gz"
+                f"{svc_name}_{strftime('%d-%m-%Y_%H:%M:%S')}.tar.gz"
             )
 
             path_inside = "/server"
-            print(svc_name)
             try:
-                proc = run(
-                    [
-                        "docker",
-                        "exec",
-                        svc_name,
-                        "tar",
-                        "-C",
-                        path_inside,
-                        "-czf",
-                        "-",
-                        ".",
-                    ],
-                    stdout=PIPE,
-                    stderr=PIPE,
-                )
+                with open(tar_file, "wb") as f:
+                    proc = run(
+                        [
+                            "docker",
+                            "exec",
+                            svc_name,
+                            "tar",
+                            "-C",
+                            path_inside,
+                            "-czf",
+                            "-",
+                            ".",
+                        ],
+                        stdout=f,
+                        stderr=PIPE,
+                    )
             except Exception as exc:
-                print(f"Error running tar inside container {svc_name}: {exc}")
+                print(f"Error writting backup file {tar_file}: {exc}")
                 continue
             if proc.returncode != 0:
                 err = proc.stderr.decode(errors="ignore")
                 print(f"tar failed for container {svc_name}: {err}")
                 continue
+
+        database: dict[str, str] = data.get("compose", {}).get("database", {}) or {}
+        if database:
+            db_user: str = database.get("user", "")
+            db_name: str = database.get("db", "")
+            db_backup_file = backup_path.joinpath(
+                f"database_{strftime('%d-%m-%Y_%H:%M:%S')}.sql"
+            )
             try:
-                with open(tar_file, "wb") as f:
-                    f.write(proc.stdout)
+                with open(db_backup_file, "wb") as f:
+                    proc = run(
+                        [
+                            "docker",
+                            "exec",
+                            "-t",
+                            "database",
+                            "pg_dump",
+                            "-U", db_user,
+                            "-F", "c",
+                            db_name
+                        ],
+                        stdout=f,
+                        stderr=PIPE,
+                    )
             except Exception as exc:
-                print(f"Error writting backup file {tar_file}: {exc}")
-                continue
+                print(f"Error writting backup file for sql database: {exc}")
+                return
+            if proc.returncode != 0:
+                err = proc.stderr.decode(errors="ignore")
+                print(f"Failed to extract the sql database: {err}")

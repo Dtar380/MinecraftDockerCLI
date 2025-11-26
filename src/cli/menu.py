@@ -344,6 +344,8 @@ class Menus:
 
     def __get_name(self, msg: str) -> str:
         while True:
+            clear(0.5)
+
             name = str(
                 inquirer.text(  # type: ignore
                     message=msg, validate=EmptyInputValidator()
@@ -354,6 +356,7 @@ class Menus:
                 return name
 
     def __get_password(self) -> str:
+        clear(0.5)
         password = str(
             inquirer.secret(  # type: ignore
                 message="Enter your database password: ",
