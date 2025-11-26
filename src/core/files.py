@@ -50,7 +50,10 @@ class FileManager:
             )
 
         server_files: list[dicts] = data.get("server_files", []) or []
-        self.copy_files(self.cwd, server_files)
+        self.copy_server_files(self.cwd, server_files)
+
+        if compose.get("web", False):
+            self.copy_web_files(self.cwd)
 
         envs: list[dicts] = data.get("envs") or []
         for env in envs:
@@ -83,8 +86,8 @@ class FileManager:
             f.write(data_str)
         return None
 
-    @yaspin(text="Copying files...", color="cyan")
-    def copy_files(self, path: Path, server_files: list[dicts]) -> None:
+    @yaspin(text="Copying server files...", color="cyan")
+    def copy_server_files(self, path: Path, server_files: list[dicts]) -> None:
         sleep(self.sleep)
 
         docker_pkg = files("src.assets.docker")
@@ -96,7 +99,7 @@ class FileManager:
 
         # Ensure base path exists
         if not path.exists():
-            raise ValueError("Path doesnt exist")
+            raise ValueError("Path doesn't exist")
 
         # Read bytes from resources once
         dockerfile_bytes = dockerfile_res.read_bytes()
@@ -133,6 +136,33 @@ class FileManager:
 
         # Write top-level README into the given path
         (path / "README.md").write_bytes(readme_bytes)
+
+    @yaspin(text="Copying web files...", color="cyan")
+    def copy_web_files(self, path: Path) -> None:
+        docker_pkg = files("src.assets.docker")
+        frontend_dockerfile_res = docker_pkg.joinpath("node.Dockerfile")
+        frontend_dockerignore_res = docker_pkg.joinpath("node.dockerignore")
+        backend_dockerfile_res = docker_pkg.joinpath("python.Dockerfile")
+        backend_dockerignore_res = docker_pkg.joinpath("python.dockerignore")
+
+        if not path.exists():
+            raise ValueError("Path doesn't exist")
+
+        frontend_dockerfile_bytes = frontend_dockerfile_res.read_bytes()
+        frontend_dockerignore_bytes = frontend_dockerignore_res.read_bytes()
+        backend_dockerfile_bytes = backend_dockerfile_res.read_bytes()
+        backend_dockerignore_bytes = backend_dockerignore_res.read_bytes()
+
+        web_dir = path.joinpath("/web")
+        frontend_dir = web_dir.joinpath("/frontend")
+        backend_dir = web_dir.joinpath("/backend")
+        frontend_dir.mkdir(parents=True, exist_ok=True)
+        backend_dir.mkdir(parents=True, exist_ok=True)
+
+        (frontend_dir / "Dockerfile").write_bytes(frontend_dockerfile_bytes)
+        (frontend_dir / ".dockerignore").write_bytes(frontend_dockerignore_bytes)
+        (backend_dir / "Dockerfile").write_bytes(backend_dockerfile_bytes)
+        (backend_dir / ".dockerignore").write_bytes(backend_dockerignore_bytes)
 
     @yaspin(text="Rendering template...", color="cyan")
     def template_to_file(

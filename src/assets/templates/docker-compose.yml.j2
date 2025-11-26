@@ -60,15 +60,15 @@ services:
 {% endif %}
 {% if web %}
   frontend:
-    build: ./frontend
+    build: ./web/frontend
     container_name: frontend_app
     ports:
       - "80:80"   # Host:Container
     depends_on:
-      - web
+      - backend
 
   backend:
-    build: ./backend
+    build: ./web/backend
     container_name: web_server
     ports:
       - "8000:8000"
