@@ -1,16 +1,29 @@
-.. MinecraftDockerCLI documentation master file, created by
-   sphinx-quickstart on Tue Nov 25 23:03:00 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+```{toctree}
+:maxdepth: 2
+:caption: Getting Started
+:hidden:
 
-MinecraftDockerCLI documentation
-================================
+GettingStarted/installation.md
+GettingStarted/setup.md
+```
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+```{toctree}
+:maxdepth: 2
+:caption: Documentation
+:hidden:
 
+Documentation/command_groups.md
+```
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+```{toctree}
+:maxdepth: 2
+:caption: Repo Info
+:hidden:
+
+Changelog <https://github.com/Dtar380/MinecraftDockerCLI/blob/master/CHANGELOG.md>
+Issues <https://github.com/Dtar380/MinecraftDockerCLI/issues>
+Security <https://github.com/Dtar380/MinecraftDockerCLI/security/policy>
+Source <https://github.com/Dtar380/MinecraftDockerCLI>
+```
+
+# MinecraftDockerCLI

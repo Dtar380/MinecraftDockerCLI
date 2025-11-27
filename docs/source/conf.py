@@ -17,7 +17,7 @@ version = "0.5.2"
 
 extensions = ["myst_parser", "sphinx.ext.autodoc", "sphinx.ext.viewcode"]
 
-templates_path = ["templates"]
+templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 source_suffix = [".rst", ".md"]
@@ -26,4 +26,5 @@ source_suffix = [".rst", ".md"]
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "furo"
-html_static_path = ["static"]
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]

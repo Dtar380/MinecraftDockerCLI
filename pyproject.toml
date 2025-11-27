@@ -69,18 +69,9 @@ MinecraftDockerCLI = "src.__main__:main"
 
 # Tareas de desarrollo con poethepoet
 [tool.poe.tasks]
-# Linting y type checking
-type-check = "mypy --install-types --non-interactive APP tests"
-lint-check = "flake8 APP tests"
-
-# Formateo
-format = "black APP tests"
-import-sort = "isort APP tests"
-
-# Tareas combinadas
-format-all = ["import-sort", "format"]
-lint-all = ["type-check", "lint-check"]
-check-all = ["format-all", "lint-all", "test"]
+# Sphinx docs
+server = "python -m http.server --directory ./docs/build/html"
+make-docs = "docs/make.bat html"
 
 # Configuración para herramientas de desarrollo
 [tool.black]
