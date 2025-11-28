@@ -4,14 +4,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MinecraftDockerCLI"
-version = "0.6.0"
+version = "0.7.0"
 description = "CLI tool to enhance and simplify containerization of Minecraft servers"
 readme = "README.md"
 license = "MIT"
 authors = ["Dtar380"]
 maintainers = ["Dtar380"]
 homepage = "https://github.com/dtar380/Minecraft-Dockerfile-CLI"
-documentation = "https://github.com/Dtar380/MinecraftDockerCLI/blob/master/README.md"
+documentation = "https://minecraftdockercli.readthedocs.io/en/latest/"
 repository = "https://github.com/dtar380/Minecraft-Dockerfile-CLI"
 keywords = ["minecraft", "docker", "server"]
 classifiers = [

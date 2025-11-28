@@ -15,6 +15,7 @@ After running the command you will have the next structure in your CWD (current 
  - backup/
  - servers/
    - `server name`/
+     - .env
      - .dockerignore
      - Dockerfile
      - run.sh
@@ -28,6 +29,9 @@ After running the command you will have the next structure in your CWD (current 
    - backend/
      - .dockerignore
      - Dockerfile
+```{note}
+The `expose` ports will be the ones that you will use to connect to the servers via the proxy when setting up a network.
+```
 
 ## Using docker commands
 ### Up command

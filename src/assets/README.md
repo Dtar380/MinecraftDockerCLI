@@ -5,30 +5,41 @@
 | |  | |_| |_| |\  | |___| |____| | \ \  / ____ \| |       | |    | |__| | |__| | |____| . \| |____| | \ \  | |____| |____ _| |_
 |_|  |_|_____|_| \_|______\_____|_|  \_\/_/    \_\_|       |_|    |_____/ \____/ \_____|_|\_\______|_|  \_\  \_____|______|_____|
 
-MinecraftDockerCLI User Manual.
+**READ BEFORE USING THE APP.**
 
-Your tree file will look something like this:
+# START
+If this file is in your Current Working Directory (CWD), it means your files built correctly, you should still check if your project has the following structure:
 +---docker-compose.yml
 +---README.md
 +---data.json
+\---backup
 \---servers
-    \---server1
+|    \---`server name`
+|       +---.env
+|       +---.dockerignore
+|       +---Dockerfile
+|       +---run.sh
+|       \---data
+|           +---eula.txt
+|           +---`.jar` file
+\---web
+    \---backend
+    |   +---.dockerignore
+    |   +---Dockerfile
+    \---frontend
         +---.dockerignore
-        +---.env
         +---Dockerfile
-        +---run.sh
-        \---MINECRAFT FILES
 
-Now lets explain what each file does:
-- docker-compose.yml is the file in charge of giving docker the information about what each service (container) must look like.
-- data.json is the file in charge of storing all the data which is used to later render the docker-compose.yml and .env files.
-- servers/ is the folder containing each minecraft server, the user should create this directory and fill them with the required data.
-- The server folders should be named accordingly to the service names on the docker-compose.yml
-- .dockerignore is the file which tells docker what files should it ignore on build
-- .env is the file containing all the environment variables our container will use.
-- Dockerfile is the file that docker will use to build the containers
-- run.sh is the script the docker containers will use to run the minecraft server.
+# Minecraft Configs
+If you didnt setup a network, you will have a one and only container, you can always configure it running it on your host inside the data folder, and then up the container once you finished configuring
 
-Minecraft related stuff:
-If you are creating a network, we recommend you use velocity as the proxy. Said this, you'll need to take into consideration the next things:
-- The proxy connections should look like: {server_name} = {service_name}:port
+If you setup creating a network you need to know the following things:
+- The proxy will be done inside the velocity config like this:<br>
+  `{server_name} = {service_name}:port`<br>
+  Where:
+  - server_name: is anything you want.
+  - service_name: is the docker container service name.
+  - port: is the minecraft port you exposed on the container.
+- To connect a database you will set it up like: `database:5432`
+- Your host machine should have forwarded the port you added to your proxy.
+- To connect to the server you will need to use the public IP of the host and the port you assigned to your proxy.

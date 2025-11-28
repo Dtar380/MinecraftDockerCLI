@@ -1,6 +1,16 @@
 # CHANGELOG
 All released versions changes will be tracked and documented in this file.
 
+## [0.7](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.7.0) - 28th November 2025
+Added a readthedocs documentation. Did a more thorough README.md documentation on assets inside the source.
+
+### Changed
+- README.md
+
+### Added
+- docs
+
+
 ## [0.6](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.6.0) - 25th November 2025
 Added support for web server (python backend, nodejs frontend) and PostgreSQL server.
 
