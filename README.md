@@ -25,6 +25,12 @@
 - [:money\_with\_wings: **Sponsorship**](#money_with_wings-sponsorship)
 
 ## :blue_heart: **Main Feautures**
+- **Full Minecraft servers Containerization**
+- **Prompt based data input**
+- **Up/Down, Start/Stop docker commands implementation**
+- **SQL database compatibility**
+- **Web servers compatibility**
+- **Backups for Minecraft Servers and Databases**
 
 ## :arrow_down: **Installation**
 
