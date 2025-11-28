@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MinecraftDockerCLI"
-version = "0.8.0"
+version = "0.8.1"
 description = "CLI tool to enhance and simplify containerization of Minecraft servers"
 readme = "README.md"
 license = "MIT"
@@ -29,7 +29,7 @@ packages = [{ include = "src" }]
 
 [tool.poetry.urls]
 "Homepage" = "https://github.com/dtar380/Minecraft-Dockerfile-CLI"
-"Documentation" = "https://github.com/dtar380/Minecraft-Dockerfile-CLI"
+"Documentation" = "https://minecraftdockercli.readthedocs.io/en/latest/"
 "Repository" = "https://github.com/dtar380/Minecraft-Dockerfile-CLI"
 "Bug Tracker" = "https://github.com/Dtar380/Minecraft-Dockerfile-CLI/issues"
 

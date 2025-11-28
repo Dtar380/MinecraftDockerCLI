@@ -1,7 +1,7 @@
 # CHANGELOG
 All released versions changes will be tracked and documented in this file.
 
-## [0.8](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.8.0) - 29th November 2025
+## [0.8](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.8.1) - 29th November 2025
 Implemented update web and database functionality
 
 ### Changed
