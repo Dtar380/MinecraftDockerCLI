@@ -1,6 +1,15 @@
 # CHANGELOG
 All released versions changes will be tracked and documented in this file.
 
+## [0.8](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.8.0) - 29th November 2025
+Implemented update web and database functionality
+
+### Changed
+- Menu class
+- Builder class
+- Tests
+- Docs
+
 ## [0.7](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.7.1) - 28th November 2025
 Added a readthedocs documentation. Did a more thorough README.md documentation on assets inside the source.
 

@@ -2,5 +2,5 @@ from __future__ import annotations
 
 from .__main__ import *
 
-__version__ = "0.7.1"
+__version__ = "0.8.0"
 __name__ = "MinecraftDockerCLI"
