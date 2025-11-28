@@ -30,3 +30,6 @@ For building from source you need to follow the next steps:
     `git clone https://github.com/Dtar380/MinecraftDockerCLI.git`
  - Enter the folder of the repository you cloned and run: <br>
     `python -m pip install -e`
+```{warning}
+Do not errase the code from the cloned repository since the APP will be running from that source code
+```
