@@ -13,6 +13,7 @@ GettingStarted/basic_usage.md
 :hidden:
 
 Documentation/command_groups.md
+Documentation/data_json.md
 ```
 
 ```{toctree}
