@@ -36,3 +36,9 @@ This command will save a `.tar` file of every minecraft server and if theres a d
 ```{note}
 For running backup command the containers must be up and running
 ```
+
+## Open
+The open command is the one you should use to open the running terminal of your minecraft server.<br>
+THis command takes two argument:
+- `--server`: Name of the server to attach the terminal to.
+- `--detach-keys`: Combination of keys to detach from the container terminal.

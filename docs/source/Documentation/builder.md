@@ -17,9 +17,12 @@ This command takes four arguments:
 - `--add`: Flag to use when
 - `--remove`: Flag to use when removing a service.
 - `--change`: Flag to use the change mode of prompts, where prompts will be defaulted to the values in the `data.json` file.
-- `--service`: Parameter to specify the name of the service to edit
+- `--web`: Flag to change the web server status, acts as a switch from true to false and false to true.
+- `--database`: Flag to use when changing env values of a database or adding a one.
+- `--database`:
+- `--server`: Parameter to specify the name of the service to edit
 ```{note}
-`--service` parameter does not work with `--add` since `--service` only accepts names of existing services.
+`--server` parameter does not work with `--add` since `--service` only accepts names of existing services.
 ```
 
 ## Build

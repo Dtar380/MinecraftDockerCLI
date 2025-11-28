@@ -123,6 +123,8 @@ class Builder(CustomGroup):
             Option(["--add"], is_flag=True, default=False),
             Option(["--remove"], is_flag=True, default=False),
             Option(["--change"], is_flag=True, default=False),
+            Option(["--database"], is_flag=True, default=False),
+            Option(["--web"], is_flag=True, default=False),
         ]
 
         def callback(
@@ -130,6 +132,8 @@ class Builder(CustomGroup):
             add: bool = False,
             remove: bool = False,
             change: bool = False,
+            database: bool = False,
+            web: bool = False,
         ) -> None:
             clear(0)
 
@@ -296,8 +300,33 @@ class Builder(CustomGroup):
                     self.file_manager.save_files(data)
                     print(f"server '{name}' removed and files updated.")
 
+            elif database:
+                current: dict[str, str] = compose.get("database", {}) or {}
+                defaults = (
+                    None
+                    if current == {}
+                    else {"database": current}  # type: ignore
+                )
+                menu = Menus(defaults=defaults)
+                db = menu.database()
+                if confirm(msg="Update database?"):
+                    compose["database"] = db
+                    data["compose"] = compose
+                    self.file_manager.save_files(data)
+                    print("Database was updated.")
+
+            elif web:
+                current = compose.get("web", False)
+                if confirm(msg="Update web status?"):
+                    compose["web"] = not current
+                    data["compose"] = compose
+                    self.file_manager.save_files(data)
+                    print("Web status was changed.")
+
             else:
-                print("Use --add, --remove or --change flag.")
+                print(
+                    "Use --add, --remove, --change, --web or --database flag."
+                )
                 print("Use --servers [server] for faster output.")
                 for s in servers:
                     print(f" - {s.get('name')}")

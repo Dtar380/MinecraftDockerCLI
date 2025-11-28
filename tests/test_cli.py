@@ -237,7 +237,10 @@ class Test_CLI:
         print(data)
         result = self.runner.invoke(self.cli, ["update"])
         assert result.exit_code != 0
-        assert "Use --add, --remove or --change flag." in result.output
+        assert (
+            "Use --add, --remove, --change, --web or --database flag."
+            in result.output
+        )
 
     def test_update_remove(  # type: ignore
         self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
@@ -362,6 +365,62 @@ class Test_CLI:
         server_files_after = data_after.get("server_files", [])
         assert len(server_files_after) == 1
         assert server_files_after[0] == changed_svc_files
+
+    def test_update_database(  # type: ignore
+        self, isolate_cwd: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        base = isolate_cwd
+
+        root = Path(__file__).resolve().parent.parent
+        template = root / "src" / "assets" / "templates" / "template.json"
+        with open(template, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        (base / "data.json").write_text(
+            json.dumps(data, indent=2), encoding="utf-8"
+        )
+
+        data_base_changed = {
+            "user": "UserName",
+            "password": "PassCode",
+            "db": "aDatabase",
+        }
+
+        monkeypatch.setattr(
+            import_module("src.cli.menu").Menus,
+            "database",
+            lambda self: data_base_changed,  # type: ignore
+        )
+
+        result = self.runner.invoke(self.cli, ["update", "--database"])
+        assert result.exit_code == 0
+
+        data_after = json.loads(
+            (base / "data.json").read_text(encoding="utf-8")
+        )
+        assert data_after.get("compose").get("database") == data_base_changed
+
+    def test_update_web(self, isolate_cwd: Path) -> None:
+        base = isolate_cwd
+
+        root = Path(__file__).resolve().parent.parent
+        template = root / "src" / "assets" / "templates" / "template.json"
+        with open(template, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        (base / "data.json").write_text(
+            json.dumps(data, indent=2), encoding="utf-8"
+        )
+
+        result = self.runner.invoke(self.cli, ["update", "--web"])
+        assert result.exit_code == 0
+
+        data_after = json.loads(
+            (base / "data.json").read_text(encoding="utf-8")
+        )
+        assert data_after.get("compose").get("web") != data.get("compose").get(
+            "web"
+        )
 
     def test_build_errors(self, isolate_cwd: Path) -> None:
         base = isolate_cwd

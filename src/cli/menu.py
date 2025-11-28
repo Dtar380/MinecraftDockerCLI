@@ -336,30 +336,38 @@ class Menus:
         ).execute()
 
     def database(self) -> dict[str, str]:
+        db: dict[str, str] = {}
+        if self.defaults:
+            db = self.defaults.get("database", {})
+        user = db.get("user", "")
+        password = db.get("password", "")
+        name = db.get("db", "")
+
         return {
-            "user": self.__get_name("Enter a username: "),
-            "password": self.__get_password(),
-            "db": self.__get_name("Enter a name for the database: "),
+            "user": self.__get_name("Enter a username: ", user),
+            "password": self.__get_password(password),
+            "db": self.__get_name("Enter a name for the database: ", name),
         }
 
-    def __get_name(self, msg: str) -> str:
+    def __get_name(self, msg: str, default: str = "") -> str:
         while True:
             clear(0.5)
 
             name = str(
                 inquirer.text(  # type: ignore
-                    message=msg, validate=EmptyInputValidator()
+                    message=msg, default=default, validate=EmptyInputValidator()
                 ).execute()
             )
 
             if confirm(msg="Confirm your input: "):
                 return name
 
-    def __get_password(self) -> str:
+    def __get_password(self, default: str = "") -> str:
         clear(0.5)
         password = str(
             inquirer.secret(  # type: ignore
                 message="Enter your database password: ",
+                default=default,
                 validate=PasswordValidator(
                     length=8,
                     cap=True,
