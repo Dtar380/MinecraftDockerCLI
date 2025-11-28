@@ -1,7 +1,7 @@
 # CHANGELOG
 All released versions changes will be tracked and documented in this file.
 
-## [0.7](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.7.0) - 28th November 2025
+## [0.7](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.7.1) - 28th November 2025
 Added a readthedocs documentation. Did a more thorough README.md documentation on assets inside the source.
 
 ### Changed
