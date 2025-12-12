@@ -371,7 +371,7 @@ class Builder(CustomGroup):
         self, menu: Menus, name: str | None = None
     ) -> tuple[dicts, dicts, dicts]:
         if not name:
-            name = self.__get_name(message="Enter the name of the server: ")
+            name = self.__get_name(message="Enter the name of the server: ").lower()
 
         menu.name = name
 
