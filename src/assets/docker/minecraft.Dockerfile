@@ -1,16 +1,14 @@
-FROM eclipse-temurin:21-jdk-jammy
+FROM eclipse-temurin:21-jre-alpine
 
-ENV CONTAINER_NAME=""
-ENV SERVER_DIR=/server
-ENV SERVER_JAR=""
-ENV JAVA_ARGS=""
-ENV MIN_HEAP_SIZE=""
-ENV MAX_HEAP_SIZE=""
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY ./data /server
-WORKDIR /server
+WORKDIR $SERVER_DIR
+COPY ./data .
 
 COPY run.sh /usr/local/bin/run.sh
 RUN chmod +x /usr/local/bin/run.sh
+
+RUN useradd --create-home serverUser
+USER serverUser
 
 ENTRYPOINT ["/usr/local/bin/run.sh"]

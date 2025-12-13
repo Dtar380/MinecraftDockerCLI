@@ -1,4 +1,4 @@
-# Etapa 1: build
+# ────────────── First stage ──────────────
 FROM node:25-slim AS build
 
 WORKDIR /app
@@ -8,10 +8,14 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Etapa 2: servir archivos estáticos con Nginx
+# ────────────── First stage ──────────────
 FROM nginx:alpine-slim
+
+RUN useradd --create-home appUser
+USER appUser
 
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]
