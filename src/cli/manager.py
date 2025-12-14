@@ -125,3 +125,19 @@ class Manager(CustomGroup):
             callback=callback,
             params=options,  # type: ignore
         )
+
+    def restart(self) -> Command:
+
+        help = "Restart the containers."
+        options: list[Option] = []
+
+        def callback() -> None:
+            self.compose_manager.stop()
+            self.compose_manager.start()
+
+        return Command(
+            name=inspect.currentframe().f_code.co_name,  # type: ignore
+            help=help,
+            callback=callback,
+            params=options,  # type: ignore
+        )
