@@ -1,12 +1,13 @@
-<!-- TEMPLATE -->
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[BUG]:"
+title: "[BUG] - "
 labels: bug
 assignees: ''
 
 ---
+
+<!-- TEMPLATE -->
 
 ### Description
 _Describe the error. Please be clear and concise. Give your own code for better analisys._

@@ -1,8 +1,7 @@
-<!-- TEMPLATE -->
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: "[REQUEST]:"
+title: "[FEATURE] - "
 labels: enhancement
 assignees: ''
 
