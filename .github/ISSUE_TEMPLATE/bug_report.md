@@ -6,7 +6,7 @@ labels: bug
 assignees: ''
 
 ---
-<!-- TEMPLATE -->
+<!-- TEMPLATE (DO NOT REMOVE) -->
 
 ### Description
 _Describe the error. Please be clear and concise. Give your own code for better analisys._
