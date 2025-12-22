@@ -35,7 +35,9 @@ class ComposeManager:
         print_output: bool = True,
     ) -> CompletedProcess[str]:
         command = ["docker", "compose", "-f", str(self.composer_file), *args]
-        result = run(command, text=True, capture_output=capture_output)
+        result = run(
+            command, text=True, capture_output=capture_output, check=True
+        )
         if result.returncode != 0 and print_output:
             print("ERROR: ", result.stderr)
         elif print_output:
@@ -126,7 +128,7 @@ class ComposeManager:
                 f"{svc_name}_{strftime('%d-%m-%Y_%H-%M-%S')}.tar.gz"
             )
 
-            path_inside = "/server"
+            path_inside = "/home/serverUser"
             try:
                 with open(tar_file, "wb") as f:
                     proc = run(
@@ -143,6 +145,7 @@ class ComposeManager:
                         ],
                         stdout=f,
                         stderr=PIPE,
+                        check=True,
                     )
             except Exception as exc:
                 print(f"Error writting backup file {tar_file}: {exc}")
@@ -152,7 +155,9 @@ class ComposeManager:
                 print(f"tar failed for container {svc_name}: {err}")
                 continue
 
-        database: dict[str, str] = data.get("compose", {}).get("database", {}) or {}
+        database: dict[str, str] = (
+            data.get("compose", {}).get("database", {}) or {}
+        )
         if database:
             db_user: str = database.get("user", "")
             db_name: str = database.get("db", "")
@@ -168,12 +173,15 @@ class ComposeManager:
                             "-t",
                             "postgres_db",
                             "pg_dump",
-                            "-U", db_user,
-                            "-F", "c",
-                            db_name
+                            "-U",
+                            db_user,
+                            "-F",
+                            "c",
+                            db_name,
                         ],
                         stdout=f,
                         stderr=PIPE,
+                        check=True,
                     )
             except Exception as exc:
                 print(f"Error writting backup file for sql database: {exc}")
