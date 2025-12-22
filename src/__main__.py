@@ -3,12 +3,14 @@
 #################################################
 from __future__ import annotations
 
-from click import Context, Group, group, option
+from click import Context, Group, group, option, version_option
 from click.formatting import HelpFormatter
 
 from .cli.builder import Builder
 from .cli.manager import Manager
 from .utils import cli as cli_utils
+
+from . import __version__
 
 
 #################################################
@@ -46,7 +48,10 @@ class TopGroup(Group):
             super().format_commands(ctx, formatter)
 
 
-# Create the main group for the CLI using custom Group class
+@version_option(
+    version=__version__,
+    message="%(version)s",
+)
 @option(
     "-v",
     "--verbose",
