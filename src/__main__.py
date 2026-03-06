@@ -22,7 +22,7 @@ class TopGroup(Group):
         # Build a mapping source -> list[(name, help)]
         sections: dict[str, list[tuple[str, str]]] = {}
         for cmd_name in self.list_commands(ctx):
-            cmd = self.get_command(ctx, cmd_name)
+            cmd = self.get_command(ctx, cmd_name)  # pylint: disable=W0621
             if cmd is None:
                 continue
             source = getattr(cmd, "source", "Other")
@@ -32,7 +32,7 @@ class TopGroup(Group):
 
         # Write sections in a stable order (Builder, Manager, Other)
         order = ["Builder", "Manager"] + [
-            s for s in sections.keys() if s not in ("Builder", "Manager")
+            s for s in sections.keys() if s not in ("Builder", "Manager")  # pylint: disable=C0201
         ]
         written_any = False
         for sec in order:
