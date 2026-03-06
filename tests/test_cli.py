@@ -16,7 +16,7 @@ class Test_CLI:
 
     def setup_method(self) -> None:
         self.runner = CliRunner()
-        from src import cli
+        from src.__main__ import cli
 
         self.cli = cli
 
