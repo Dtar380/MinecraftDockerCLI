@@ -2,7 +2,21 @@
 
 All released versions changes will be tracked and documented in this file.
 
-## [0.10.0](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.9.0) - 14st December 2025
+## [1.0.0](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/1.0.0) - 15th March 2026
+
+First official release.
+The package passed all implementation tests and it has the planned functionality.
+The package has also been tested in a real enviroment and proven succesfull.
+
+## [0.11.0](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.11.0) - 22nd December 2025
+
+Implemented --version flare to show on the CLI the installed version of the app.
+
+### Added
+
+- --version flare
+
+## [0.10.0](https://github.com/Dtar380/MinecraftDockerCLI/releases/tag/0.10.1) - 14st December 2025
 
 Implemented restart command.
 Changed Dockerfiles to be more optimised and lightweight.

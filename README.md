@@ -72,12 +72,11 @@ poetry install
 - If `data.json` is missing, run `builder create` first to scaffold services.
 
 ## :memo:  **Working On**
-Currently resolving issues and developing the unit tests for future updates.
+Project is finished!
 
 Already Planned releases
 | VERSION | INCLUDES                      |
 |---------|-------------------------------|
-| 1.0.0   | First release (Do full tests) |
 
 Feel free to open Feature Requests at [issues](https://github.com/Dtar380/WorkspaceAutomation/issues/new/choose).
 
