@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-# MinecraftDockerCLI
+# Minecraft Docker CLI
 <!-- omit in toc -->
 ## Set up your Minecraft network blazingly fast
 
